@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>개미군단 - Standalone</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06110c;--bg-soft:#0d1d16;--card:#0f221b;--card2:#152b21;
+  --text:#e4ede7;--muted:#8ea89b;--dim:#5e786a;--line:#214032;
+  --line-strong:#39614c;--accent:#f3ca65;--orange:#e67e22;
+}
+html,body{min-height:100%;background:radial-gradient(circle at 50% 30%, #11261d 0%, #050e0a 100%);color:var(--text)}
+body{
+  font-family:"Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;
+  line-height:1.5;overflow-x:hidden;
+}
+button,input{font:inherit}
+.site-navbar{
+  position:sticky;top:0;z-index:20;background:#0c1c15f0;
+  border-bottom:1px solid #214233;backdrop-filter:blur(14px);
+}
+.site-nav-inner{
+  width:min(1200px,100%);margin:auto;min-height:58px;padding:8px 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.site-nav-brand-link{display:flex;align-items:center;gap:9px;color:var(--accent);text-decoration:none}
+.site-nav-title{font-size:18px;font-weight:700;letter-spacing:.04em;color:#f3ca65}
+.site-nav-subtitle{font-size:10px;color:var(--muted);display:block;line-height:1}
+.site-nav-links{display:flex;align-items:center;gap:6px}
+.site-nav-link,.site-nav-dropdown-toggle{
+  color:#d0e3d7;text-decoration:none;border:0;background:transparent;
+  padding:8px 11px;border-radius:8px;cursor:pointer;font-size:14px;
+}
+.site-nav-link:hover,.site-nav-dropdown-toggle:hover{background:#ffffff0f}
+.site-nav-link.active{color:var(--accent);background:#ffffff0a}
+.site-nav-dropdown{position:relative}
+.site-nav-dropdown-content{
+  position:absolute;right:0;top:calc(100% + 6px);min-width:180px;
+  padding:6px;background:#12261e;border:1px solid var(--line-strong);
+  border-radius:10px;box-shadow:0 12px 35px #000b;display:none;
+}
+.site-nav-dropdown-content.open{display:block}
+.site-nav-dropdown-link{
+  display:block;color:#d0e3d7;text-decoration:none;padding:8px 10px;border-radius:7px;font-size:13px;
+}
+.site-nav-dropdown-link:hover{background:#ffffff0d}
+.site-mobile-menu-toggle{display:none;background:none;border:0;color:white}
+.container{width:min(1200px,100%);margin:auto;padding:18px 16px 35px}
+.card{
+  width:min(650px,100%);margin:auto;background:var(--card);
+  border:1px solid #2a4c3b;border-radius:20px;padding:16px;
+  box-shadow:0 10px 40px #000b, inset 0 0 15px rgba(0,0,0,0.6);
+}
+#for-aspect-ratio{width:min(92vw,520px);max-width:100%;margin:auto;display:flex;flex-direction:column;gap:10px}
+#score{
+  text-align:center;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:700;margin-bottom:2px;
+  color:var(--accent);text-shadow:0 0 12px rgba(243,202,101,0.4);
+}
+#score::before{content:"포인트: ";font-size:0.7em;color:#b8a374;font-weight:500;}
+#game-table-container{width:100%;display:flex;flex-direction:column;gap:12px}
+#game-board{
+  border-collapse:collapse;table-layout:fixed;background:#0a1711;
+  border:3px solid #6b8a61;outline:2px solid #233e31;
+  margin:0 auto;width:100%;aspect-ratio:1;box-shadow:0 0 25px rgba(10,40,25,0.9), inset 0 0 20px #000;
+  touch-action:none;user-select:none;-webkit-user-select:none;
+  border-radius:4px;
+}
+#game-board td{
+  width:11.11%;height:11.11%;border:1px solid #1a3328;
+  padding:0;cursor:pointer;transition:background .08s,outline .08s;
+  touch-action:none;user-select:none;-webkit-user-select:none;
+}
+/* 3×3 구역 교차 색상 (어두운 숲 이끼 톤) */
+#game-board tr:nth-child(-n+3) td:nth-child(-n+3),
+#game-board tr:nth-child(-n+3) td:nth-child(n+7),
+#game-board tr:nth-child(n+7) td:nth-child(-n+3),
+#game-board tr:nth-child(n+7) td:nth-child(n+7),
+#game-board tr:nth-child(n+4):nth-child(-n+6) td:nth-child(n+4):nth-child(-n+6){background:#10221a}
+
+#game-board tr:nth-child(-n+3) td:nth-child(n+4):nth-child(-n+6),
+#game-board tr:nth-child(n+4):nth-child(-n+6) td:nth-child(-n+3),
+#game-board tr:nth-child(n+4):nth-child(-n+6) td:nth-child(n+7),
+#game-board tr:nth-child(n+7) td:nth-child(n+4):nth-child(-n+6){background:#162c22}
+
+#game-board td.has-piece{
+  background:linear-gradient(135deg, #38ef7d, #11998e)!important;
+  border:1px solid #0a4d2c!important;
+  box-shadow:inset 1px 1px 2px #a3f7bf, 0 0 8px rgba(56, 239, 125, 0.4);
+}
+#game-board td.piece-pending{
+  background:linear-gradient(135deg, #f1c40f, #f39c12)!important;
+  border:1px solid #7e5109!important;
+  box-shadow:inset 1px 1px 2px #fdebd0, 0 0 8px rgba(241, 196, 15, 0.5);
+}
+#game-board td.solution-preview{
+  background:linear-gradient(135deg, #2ecc71, #27ae60)!important;
+  border:1px solid #145a32!important;
+  box-shadow:inset 1px 1px 2px #abebc6, 0 0 10px rgba(46, 204, 113, 0.6);
+}
+#game-board td.solution-line{
+  background:#52be80!important;
+}
+#pieces-on-deck-container{
+  display:flex;width:100%;aspect-ratio:3/1;min-height:72px;gap:8px;
+  user-select:none;-webkit-user-select:none;
+}
+table.pieces-on-deck{
+  border-collapse:collapse;table-layout:fixed;border-spacing:0;width:33.33%;
+  border:1px solid #284c3a;background:#091510;aspect-ratio:1;
+  touch-action:none;user-select:none;-webkit-user-select:none;
+  border-radius:8px;box-shadow:inset 0 0 8px #000;
+}
+table.pieces-on-deck td{
+  width:20%;height:20%;padding:0;border:1px solid #173024;
+  cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;
+}
+/* 첨부 이미지 스타일: 첫 번째 파랑, 두 번째 주황, 세 번째 초록 입체 블록 */
+#piece-on-deck-0 td.has-piece{
+  background:linear-gradient(135deg, #2980b9, #1a5276)!important;
+  border:1px solid #0f3650!important;
+  box-shadow:inset 1px 1px 2px #a9cce3, 0 0 6px rgba(41, 128, 185, 0.5);
+}
+#piece-on-deck-1 td.has-piece{
+  background:linear-gradient(135deg, #e67e22, #a04000)!important;
+  border:1px solid #6e2c00!important;
+  box-shadow:inset 1px 1px 2px #edbb99, 0 0 6px rgba(230, 126, 34, 0.5);
+}
+#piece-on-deck-2 td.has-piece{
+  background:linear-gradient(135deg, #27ae60, #196f3d)!important;
+  border:1px solid #114b29!important;
+  box-shadow:inset 1px 1px 2px #a9dfbf, 0 0 6px rgba(39, 174, 96, 0.5);
+}
+
+#pause-button-container{display:flex;justify-content:center;text-align:center;margin-top:6px}
+#pause-button{
+  background:linear-gradient(180deg, #3d7e56 0%, #1f482f 100%);
+  color:#ffe9a9;border:1px solid #6cb885;padding:.75rem 2rem;
+  font-size:1.1rem;border-radius:22px;cursor:pointer;font-weight:700;
+  min-height:48px;min-width:160px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
+  text-shadow:0 1px 2px rgba(0,0,0,0.8);
+  transition:all 0.15s ease;
+}
+#pause-button:hover{
+  background:linear-gradient(180deg, #479265 0%, #265739 100%);
+  border-color:#81cb9a;
+  box-shadow:0 4px 18px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+#pause-button.active{
+  background:linear-gradient(180deg, #234f33 0%, #143320 100%);
+  color:#c7b37b;
+}
+.footer{text-align:center;font-size:13px;color:var(--dim);margin-top:4px}
+#speed-container{display:flex;align-items:center;justify-content:center;gap:9px}
+.speed-icon{font-size:21px;color:#38614c}
+#speed{width:min(70%,280px);height:36px;min-width:120px;accent-color:#3d7e56}
+.help{
+  margin-top:10px;color:#708d7e;font-size:12px;text-align:center;
+}
+.result{
+  margin-top:9px;text-align:center;color:#f3ca65;font-size:13px;min-height:18px;font-weight:500;
+}
+@media (hover:hover) and (pointer:fine){
+  #game-board td:hover,table.pieces-on-deck td:hover{outline:2px solid #f3ca65aa;outline-offset:-2px}
+}
+@media(max-width:768px){
+  .site-nav-inner{min-height:52px;padding:7px 11px}
+  .site-nav-links{display:none}
+  .site-mobile-menu-toggle{display:flex;flex-direction:column;gap:4px;padding:6px}
+  .site-mobile-menu-toggle span{display:block;width:24px;height:2px;background:#d0e3d7}
+  .site-mobile-menu-toggle.active + .site-nav-links{
+    display:flex;position:absolute;top:52px;left:8px;right:8px;flex-direction:column;
+    align-items:stretch;padding:8px;background:#12261e;border:1px solid var(--line-strong);
+    border-radius:10px;box-shadow:0 12px 30px #0009;
+  }
+  .site-nav-link,.site-nav-dropdown-toggle{text-align:left;width:100%}
+  .site-nav-dropdown-content{position:static;margin-top:4px}
+  .container{padding:10px 7px 20px}
+  .card{padding:10px;border-radius:14px}
+  #for-aspect-ratio{width:min(96vw,620px)}
+  #game-board{border-width:2px}
+  #pieces-on-deck-container{min-height:88px}
+  #pause-button{width:100%;max-width:280px}
+  #speed{width:100%;flex:1}
+}
+</style>
+</head>
+<body>
+<nav class="site-navbar">
+  <div class="site-nav-inner">
+    <a href="#" class="site-nav-brand-link" onclick="return false">
+      <span><span class="site-nav-title">개미족의 지혜 네모</span><span class="site-nav-subtitle">S454 마요 ₍ᵔ.ˬ.ᵔ₎</span></span>
+    </a>
+    <button class="site-mobile-menu-toggle" type="button" onclick="toggleMobileMenu()" aria-label="메뉴">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="site-nav-links">
+      <a href="#" class="site-nav-link active" onclick="return false">개미족의 지혜 네모</a>
+      <div class="site-nav-dropdown">
+        <button class="site-nav-dropdown-toggle" onclick="toggleDropdown('help-menu')">도움말 ▼</button>
+        <div id="help-menu" class="site-nav-dropdown-content">
+          <a href="#" class="site-nav-dropdown-link" onclick="showHelp();return false">사용 방법</a>
+          <a href="#" class="site-nav-dropdown-link" onclick="resetAll();return false">초기화</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <div id="for-aspect-ratio">
+      <div id="score">0</div>
+      <div id="game-table-container">
+        <table id="game-board" title="게임판. 클릭하거나 드래그해서 블록을 입력하세요.">
+          <tbody id="board-body"></tbody>
+        </table>
+
+        <div id="pieces-on-deck-container" title="5×5 입력판. 클릭하거나 드래그해서 도형을 만드세요.">
+          <table class="pieces-on-deck" id="piece-on-deck-0"><tbody></tbody></table>
+          <table class="pieces-on-deck" id="piece-on-deck-1"><tbody></tbody></table>
+          <table class="pieces-on-deck" id="piece-on-deck-2"><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div id="pause-button-container">
+        <button id="pause-button">배치</button>
+      </div>
+
+      <div class="footer">
+        <div id="speed-container">
+          <span class="speed-icon">◉</span>
+          <!-- 속도 조절 range 속성 수정: 1(최저속) ~ 10(최고속), 기본값 2 -->
+          <input title="표시 속도" name="speed" type="range" id="speed" min="1" max="10" value="2">
+        </div>
+      </div>
+      <div class="help">보드와 3개의 도형을 입력한 뒤 <b>배치</b>를 누르면 추천 배치를 적용합니다.</div>
+      <div id="result" class="result"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === BITBOARD FUNCTIONS
+const USED_BITS = 0x7FFFFFF;
+const ROW_0 = 0x1FF;
+const ROW_2 = ROW_0 << 18;
+const LEFT_BITS = 1 | (1 << 9) | (1 << 18);
+const RIGHT_BITS = LEFT_BITS << 8;
+const TOP_LEFT_CUBE = 0x7 | (0x7 << 9) | (0x7 << 18);
+
+const INF_SCORE = 9999999;
+function bitboard(a, b, c) {
+    return { a: a, b: b, c: c };
+}
+
+function getEmpty() {
+    return bitboard(0, 0, 0)
+}
+function getFull() {
+    return bitboard(USED_BITS, USED_BITS, USED_BITS);
+}
+function copy(bb) {
+    return bitboard(bb.a, bb.b, bb.c);
+}
+
+const EMPTY = getEmpty();
+const FULL = getFull();
+
+function _popcount(x) {
+    x -= x >> 1 & 0x55555555
+    x = (x & 0x33333333) + (x >> 2 & 0x33333333)
+    x = x + (x >> 4) & 0x0f0f0f0f
+    x += x >> 8
+    x += x >> 16
+    return x & 0x7f
+}
+
+function count(bb) {
+    return _popcount(bb.a) + _popcount(bb.b) + _popcount(bb.c);
+}
+
+function compare(a, b) {
+    return a.a - b.a || a.b - b.b || a.c - b.c;
+}
+
+function equal(a, b) {
+    return a.a === b.a && a.b === b.b && a.c === b.c;
+}
+
+function any(bb) {
+    return bb.a + bb.b + bb.c !== 0;
+}
+function is_empty(bb) {
+    return !any(bb);
+}
+
+function not(bb) {
+    return bitboard(~bb.a & USED_BITS, ~bb.b & USED_BITS, ~bb.c & USED_BITS);
+}
+
+function and(a, b) {
+    return bitboard(a.a & b.a, a.b & b.b, a.c & b.c);
+}
+function is_disjoint(a, b) {
+    return (a.a & b.a) === 0 && (a.b & b.b) === 0 && (a.c & b.c) === 0;
+}
+function count_intersection(a, b) {
+    return _popcount(a.a & b.a) + _popcount(a.b & b.b) + _popcount(a.c & b.c);
+}
+function count_diff(a, b) {
+    return _popcount(a.a & ~b.a) + _popcount(a.b & ~b.b) + _popcount(a.c & ~b.c);
+}
+function or(a, b) {
+    return bitboard(a.a | b.a, a.b | b.b, a.c | b.c);
+}
+function xor(a, b) {
+    return and(or(a, b), not(and(a, b)));
+}
+function diff(a, b) {
+    return bitboard(a.a & ~b.a, a.b & ~b.b, a.c & ~b.c);
+}
+function is_subset(a/*superset*/, b) {
+    return (b.a & ~a.a) === 0 && (b.b & ~a.b) === 0 && (b.c & ~a.c) === 0;
+}
+function bit(r, c) {
+    return and(row(r), column(c));
+}
+function at(bb, r, c) {
+    return !is_empty(and(bit(r, c), bb));
+}
+
+function _row(r) {
+    const result = [0, 0, 0];
+    const m = r % 3;
+    result[(r - m) / 3] = ROW_0 << (m * 9);
+    return bitboard(...result);
+}
+const ROWS = Array.from({ length: 10 }, (_, i) => _row(i));
+function row(r) {
+    return ROWS[r];
+}
+
+function _column(c) {
+    return bitboard(LEFT_BITS << c, LEFT_BITS << c, LEFT_BITS << c);
+}
+const COLS = Array.from({ length: 10 }, (_, i) => _column(i));
+function column(c) {
+    return COLS[c];
+}
+
+function _cube(i) {
+    const result = [0, 0, 0];
+    result[Math.floor(i / 3)] = TOP_LEFT_CUBE << ((i % 3) * 3);
+    return bitboard(...result);
+}
+const CUBES = Array.from({ length: 10 }, (_, i) => _cube(i));
+function cube(i) {
+    return CUBES[i];
+}
+
+function shift_right(bb) {
+    return bitboard((bb.a & ~RIGHT_BITS) << 1, (bb.b & ~RIGHT_BITS) << 1, (bb.c & ~RIGHT_BITS) << 1);
+}
+
+function shift_left(bb) {
+    return bitboard((bb.a & ~LEFT_BITS) >> 1, (bb.b & ~LEFT_BITS) >> 1, (bb.c & ~LEFT_BITS) >> 1);
+}
+
+function shift_down(bb) {
+    return bitboard(
+        (bb.a << 9) & USED_BITS,
+        ((bb.b << 9) | ((bb.a & ROW_2) >> 18)) & USED_BITS,
+        ((bb.c << 9) | ((bb.b & ROW_2) >> 18)) & USED_BITS,
+    );
+}
+function shift_up(bb) {
+    return bitboard(
+        (bb.a >> 9) | ((bb.b & ROW_0) << 18),
+        (bb.b >> 9) | ((bb.c & ROW_0) << 18),
+        bb.c >> 9,
+    );
+}
+
+// === PIECES
+const PIECES = [
+    bitboard(1, 0, 0),
+    bitboard(3, 0, 0),
+    bitboard(513, 0, 0),
+    bitboard(1025, 0, 0),
+    bitboard(514, 0, 0),
+    bitboard(7, 0, 0),
+    bitboard(262657, 0, 0),
+    bitboard(1049601, 0, 0),
+    bitboard(263172, 0, 0),
+    bitboard(515, 0, 0),
+    bitboard(1537, 0, 0),
+    bitboard(1538, 0, 0),
+    bitboard(1027, 0, 0),
+    bitboard(15, 0, 0),
+    bitboard(262657, 1, 0),
+    bitboard(1539, 0, 0),
+    bitboard(786945, 0, 0),
+    bitboard(3588, 0, 0),
+    bitboard(525315, 0, 0),
+    bitboard(519, 0, 0),
+    bitboard(262659, 0, 0),
+    bitboard(2055, 0, 0),
+    bitboard(787458, 0, 0),
+    bitboard(3585, 0, 0),
+    bitboard(3586, 0, 0),
+    bitboard(263681, 0, 0),
+    bitboard(525826, 0, 0),
+    bitboard(1031, 0, 0),
+    bitboard(3075, 0, 0),
+    bitboard(263682, 0, 0),
+    bitboard(525825, 0, 0),
+    bitboard(1542, 0, 0),
+    bitboard(31, 0, 0),
+    bitboard(262657, 513, 0),
+    bitboard(265729, 0, 0),
+    bitboard(525319, 0, 0),
+    bitboard(1836034, 0, 0),
+    bitboard(1052164, 0, 0),
+    bitboard(2567, 0, 0),
+    bitboard(787459, 0, 0),
+    bitboard(786947, 0, 0),
+    bitboard(3589, 0, 0),
+    bitboard(262663, 0, 0),
+    bitboard(1050631, 0, 0),
+    bitboard(1837060, 0, 0),
+    bitboard(1835521, 0, 0),
+    bitboard(527874, 0, 0),
+];
+
+function rotate(bb) {
+    let result = EMPTY;
+    for (let r = 0; r < 9; ++r) {
+        for (let c = 0; c < 9; ++c) {
+            if (at(bb, r, c)) {
+                const rotated_r = c;
+                const rotated_c = 8 - r;
+                result = or(result, bit(rotated_r, rotated_c));
+            }
+        }
+    }
+    return result;
+}
+
+function mirror(bb) {
+    let result = EMPTY;
+    for (let r = 0; r < 9; ++r) {
+        for (let c = 0; c < 9; ++c) {
+            if (at(bb, r, c)) {
+                result = or(result, bit(r, 8 - c));
+            }
+        }
+    }
+    return result;
+}
+
+function get_all_transformations(bb) {
+    const transformations = [];
+    let rotated = bb;
+    for (let i = 0; i < 4; ++i) {
+        rotated = rotate(rotated);
+        const mirrored = mirror(rotated);
+        transformations.push(rotated);
+        transformations.push(mirrored);
+    }
+    return transformations;
+}
+
+function perform_clears(board) {
+    let to_remove = EMPTY;
+    for (let i = 0; i < 9; ++i) {
+        const c = column(i);
+        if (is_subset(board, c)) {
+            to_remove = or(to_remove, c);
+        }
+        const r = row(i);
+        if (is_subset(board, r)) {
+            to_remove = or(to_remove, r);
+        }
+        const cb = cube(i);
+        if (is_subset(board, cb)) {
+            to_remove = or(to_remove, cb);
+        }
+    }
+    if (is_empty(to_remove)) {
+        return board;
+    }
+    return diff(board, to_remove);
+}
+
+function get_next_boards(board, p, clears_first = false) {
+    if (is_empty(p)) {
+        return [{ placement: p, board: board }];
+    }
+    let result = [];
+    let left = p;
+    const col8 = column(8);
+    const row8 = row(8);
+    while (true) {
+        if (is_disjoint(board, p)) {
+            result.push({ placement: p, board: perform_clears(or(board, p)) });
+        }
+        if (!is_disjoint(p, col8)) {
+            if (!is_disjoint(left, row8)) {
+                break;
+            }
+            left = shift_down(left);
+            p = left;
+        } else {
+            p = shift_right(p);
+        }
+    }
+    function is_clear(placement_pair) {
+        return is_subset(placement_pair.board, placement_pair.placement);
+    }
+    if (clears_first) {
+        result.sort((a, b) => is_clear(b) - is_clear(a));
+    }
+    return result;
+}
+
+const EDGES = or(or(column(0), column(8)), or(row(0), row(8)));
+const ALIGNED_BLOCKED_UP = or(row(3), row(6));
+const ALIGNED_BLOCKED_DOWN = or(row(2), row(5));
+const ALIGNED_BLOCKED_LEFT = or(column(3), column(6));
+const ALIGNED_BLOCKED_RIGHT = or(column(2), column(5));
+
+function get_eval(bb, max = INF_SCORE) {
+    const OCCUPIED_SIDE_SQUARE = 2000;
+    const OCCUPIED_CENTER_SQUARE = 1607;
+    const OCCUPIED_CORNER_SQUARE = 3067;
+
+    const SIDE_CUBE = 1358;
+    const CORNER_CUBE = 908;
+    const CENTER_CUBE = 204;
+
+    const SQUASHED_EMPTY_MIDDLE = 524;
+    const SQUASHED_EMPTY_EDGE = 3386;
+
+    const ALTERNATING_UNALIGNED = 4450;
+    const ALTERNATING_ALIGNED = 1776;
+
+    const CORNERED_EMPTY = 6540;
+    const DEADLY_PIECE = 18185;
+    const THREE_BAR = 2665;
+
+    let result = 0;
+
+    for (let i = 0; i < 9; ++i) {
+        const cb = and(cube(i), bb);
+        if (any(cb)) {
+            const cnt = count(cb);
+            if (i == 4) {
+                result += CENTER_CUBE;
+                result += OCCUPIED_CENTER_SQUARE * cnt;
+            } else if (i === 1 || i === 3 || i === 5 || i === 7) {
+                result += SIDE_CUBE;
+                result += OCCUPIED_SIDE_SQUARE * cnt;
+            } else {
+                result += CORNER_CUBE;
+                result += OCCUPIED_CORNER_SQUARE * cnt;
+            }
+        }
+    }
+    if (result >= max) return max;
+
+    const open = not(bb);
+    const blocked_up = diff(open, shift_down(open));
+    const blocked_left = diff(open, shift_right(open));
+    const blocked_right = diff(open, shift_left(open));
+    const blocked_down = diff(open, shift_up(open));
+
+    result += (count_diff(blocked_up, ALIGNED_BLOCKED_UP) - 9) * ALTERNATING_UNALIGNED;
+    result += count_intersection(blocked_up, ALIGNED_BLOCKED_UP) * ALTERNATING_ALIGNED;
+
+    result += (count_diff(blocked_left, ALIGNED_BLOCKED_LEFT) - 9) * ALTERNATING_UNALIGNED;
+    result += count_intersection(blocked_left, ALIGNED_BLOCKED_LEFT) * ALTERNATING_ALIGNED;
+
+    result += (count_diff(blocked_right, ALIGNED_BLOCKED_RIGHT) - 9) * ALTERNATING_UNALIGNED;
+    result += count_intersection(blocked_right, ALIGNED_BLOCKED_RIGHT) * ALTERNATING_ALIGNED;
+
+    result += (count_diff(blocked_down, ALIGNED_BLOCKED_DOWN) - 9) * ALTERNATING_UNALIGNED;
+    result += count_intersection(blocked_down, ALIGNED_BLOCKED_DOWN) * ALTERNATING_ALIGNED;
+
+    if (result >= max) return max;
+
+    const squashed_verticle = and(blocked_down, blocked_up);
+    result += count_diff(squashed_verticle, EDGES) * SQUASHED_EMPTY_MIDDLE;
+    result += count_intersection(squashed_verticle, EDGES) * SQUASHED_EMPTY_EDGE;
+
+    const squashed_horizontal = and(blocked_left, blocked_right);
+    result += count_diff(squashed_horizontal, EDGES) * SQUASHED_EMPTY_MIDDLE;
+    result += count_intersection(squashed_horizontal, EDGES) * SQUASHED_EMPTY_EDGE;
+
+    result += count_diff(and(blocked_up, blocked_left), or(row(0), column(0))) * CORNERED_EMPTY;
+    result += count_diff(and(blocked_up, blocked_right), or(row(0), column(8))) * CORNERED_EMPTY;
+    result += count_diff(and(blocked_down, blocked_left), or(row(8), column(0))) * CORNERED_EMPTY;
+    result += count_diff(and(blocked_down, blocked_right), or(row(8), column(8))) * CORNERED_EMPTY;
+
+    if (result >= max) return max;
+
+    const open_left = shift_right(open);
+    const open_2_left = shift_right(open_left);
+    const open_right = shift_left(open);
+    const open_2_right = shift_left(open_right);
+    const open_up = shift_down(open);
+    const open_2_up = shift_down(open_up);
+    const open_down = shift_up(open);
+    const open_2_down = shift_up(open_down);
+
+    const open_up_left = shift_right(open_up);
+    const open_down_left = shift_right(open_down);
+    const open_up_right = shift_left(open_up);
+    const open_down_right = shift_left(open_down);
+
+    const open_and_open_left = and(open, open_left);
+    const open_and_open_right = and(open, open_right);
+    const open_and_open_up = and(open, open_up);
+    const open_and_open_down = and(open, open_down);
+
+    let fillable_by_horizontal_3_bar =
+        or(and(open_and_open_left, open_right), or(and(open_and_open_left, open_2_left), and(open_and_open_right, open_2_right)));
+    result += count_intersection(open, not(fillable_by_horizontal_3_bar)) * THREE_BAR;
+
+    let fillable_by_verticle_3_bar = or(and(open_and_open_up, open_down), or(and(open_and_open_up, open_2_up), and(open_and_open_down, open_2_down)));
+    result += count_intersection(open, not(fillable_by_verticle_3_bar)) * THREE_BAR;
+
+    if (result >= max) return max;
+
+    const open_and_open_2_left = and(open, open_2_left);
+    const open_and_open_2_right = and(open, open_2_right);
+    const open_and_open_2_up = and(open, open_2_up);
+    const open_and_open_2_down = and(open, open_2_down);
+
+    if (is_disjoint(and(open_and_open_left, open_and_open_2_left), and(open_and_open_right, open_and_open_2_right))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_up, open_and_open_2_up), and(open_and_open_down, open_and_open_2_down))) {
+        result += DEADLY_PIECE;
+    }
+
+    if (is_disjoint(and(open_and_open_up, open_and_open_2_up), and(open_and_open_right, open_and_open_2_right))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_up, open_and_open_2_up), and(open_and_open_left, open_and_open_2_left))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_down, open_and_open_2_down), and(open_and_open_right, open_and_open_2_right))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_down, open_and_open_2_down), and(open_and_open_left, open_and_open_2_left))) {
+        result += DEADLY_PIECE;
+    }
+
+    if (is_disjoint(and(open_and_open_left, open_and_open_right), and(open_and_open_down, open_and_open_2_down))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_left, open_and_open_right), and(open_and_open_up, open_and_open_2_up))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_up, open_and_open_down), and(open_and_open_left, open_and_open_2_left))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_up, open_and_open_down), and(open_and_open_right, open_and_open_2_right))) {
+        result += DEADLY_PIECE;
+    }
+
+    if (is_disjoint(and(open_and_open_left, open_and_open_right), and(open_and_open_up, open_and_open_down))) {
+        result += DEADLY_PIECE;
+    }
+
+    if (is_disjoint(open, and(open_down_left, open_up_right))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(open, and(open_up_left, open_down_right))) {
+        result += DEADLY_PIECE;
+    }
+
+    if (is_disjoint(and(open_and_open_up, open_and_open_down), and(open_up_right, open_down_right))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_up, open_and_open_down), and(open_up_left, open_down_left))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_left, open_and_open_right), and(open_up_left, open_up_right))) {
+        result += DEADLY_PIECE;
+    }
+    if (is_disjoint(and(open_and_open_left, open_and_open_right), and(open_down_left, open_down_right))) {
+        result += DEADLY_PIECE;
+    }
+
+    return result;
+}
+
+function get_combo_magnitude(mid_clear) {
+    let result = 0;
+    for (let i = 0; i < 9; ++i) {
+        if (equal(row(i), and(row(i), mid_clear))) result += 1;
+        if (equal(column(i), and(column(i), mid_clear))) result += 1;
+        if (equal(cube(i), and(cube(i), mid_clear))) result += 1;
+    }
+    return result;
+}
+
+function get_move_score(previous_was_clear, prev, placement, after) {
+    let result = count(diff(after, prev));
+    const combo = get_combo_magnitude(or(prev, placement));
+    if (combo === 0) return result;
+
+    if (previous_was_clear) result += 9;
+
+    if (combo <= 2) result += 18 * combo;
+    else if (combo <= 4) result += 36 * combo;
+    else if (combo <= 7) result += 54 * combo;
+    else result += 72 * combo;
+
+    return result;
+}
+
+function* get_piece_set_permutations_optimized(board, piece_set) {
+    piece_set = [...piece_set];
+    piece_set.sort(compare);
+    yield piece_set;
+    if (!can_clear_with_2_pieces(board, piece_set)) return;
+    const [a, b, c] = piece_set;
+    if (!equal(b, c)) yield [a, c, b];
+    if (!equal(a, b)) yield [b, a, c];
+    if (!equal(a, c) && !equal(a, b)) yield [b, c, a];
+    if (!equal(b, c) && !equal(a, c)) yield [c, a, b];
+    if (!equal(a, c) && !equal(a, b) && !equal(b, c)) yield [c, b, a];
+}
+
+function* get_all_piece_set_permutations(piece_set) {
+    const [a, b, c] = piece_set;
+    yield [a, b, c];
+    yield [a, c, b];
+    yield [b, a, c];
+    yield [b, c, a];
+    yield [c, a, b];
+    yield [c, b, a];
+}
+
+function can_clear_with_2_pieces(board, piece_set) {
+    for (let i = 0; i < 3; ++i) {
+        const p0 = piece_set[i];
+        for (let { board: after_p0 } of get_next_boards(board, p0)) {
+            for (let j = 0; j < 3; ++j) {
+                if (i === j) continue;
+                const p1 = piece_set[j];
+                for (let { board: after_p1 } of get_next_boards(after_p0, p1)) {
+                    if (count(after_p1) < count(board) + count(p0) + count(p1)) return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function ai_make_move(game, original_piece_set) {
+    const piece_set = original_piece_set.map(p => left_top_justify_piece(p));
+    const board = game.board;
+
+    const ai_move_base = ai_make_move_impl(game, piece_set);
+
+    let result = {
+        evaluation: INF_SCORE,
+        new_game_states: Array(3).fill({
+            board: getFull(),
+            previous_piece_placement: getEmpty(),
+            previous_piece: getEmpty(),
+            score: game.score,
+            previous_move_was_clear: false,
+        })
+    };
+    let best_score = -1;
+
+    for (const [p0, p1, p2] of get_all_piece_set_permutations(piece_set)) {
+        for (const { placement: placement_0, board: after_p0 } of get_next_boards(board, p0)) {
+            if (!ai_move_base.new_game_states.some(state => equal(state.previous_piece_placement, placement_0))) continue;
+            for (const { placement: placement_1, board: after_p1 } of get_next_boards(after_p0, p1)) {
+                if (!ai_move_base.new_game_states.some(state => equal(state.previous_piece_placement, placement_1))) continue;
+
+                for (const { placement: placement_2, board: after_p2 } of get_next_boards(after_p1, p2)) {
+                    if (!ai_move_base.new_game_states.some(state => equal(state.previous_piece_placement, placement_2))) continue;
+                    if (!equal(ai_move_base.new_game_states[2].board, after_p2)) continue;
+
+                    const p0_move_was_clear = count(after_p0) < count(board) + count(p0);
+                    const p1_move_was_clear = count(after_p1) < count(after_p0) + count(p1);
+                    const p2_move_was_clear = count(after_p2) < count(after_p1) + count(p2);
+                    const score_after_p0 = game.score + get_move_score(game.previous_move_was_clear, board, placement_0, after_p0);
+                    const score_after_p1 = score_after_p0 + get_move_score(p0_move_was_clear, after_p0, placement_1, after_p1);
+                    const score_after_p2 = score_after_p1 + get_move_score(p1_move_was_clear, after_p1, placement_2, after_p2);
+
+                    if (score_after_p2 < best_score) continue;
+                    if (score_after_p2 === best_score && !p2_move_was_clear) continue;
+
+                    best_score = score_after_p2;
+                    result = {
+                        evaluation: ai_move_base.evaluation,
+                        new_game_states: [
+                            {
+                                board: after_p0,
+                                previous_piece_placement: placement_0,
+                                previous_piece: original_piece_set[piece_set.indexOf(p0)],
+                                previous_move_was_clear: p0_move_was_clear,
+                                score: score_after_p0,
+                            },
+                            {
+                                board: after_p1,
+                                previous_piece_placement: placement_1,
+                                previous_piece: original_piece_set[piece_set.indexOf(p1)],
+                                previous_move_was_clear: p1_move_was_clear,
+                                score: score_after_p1,
+                            },
+                            {
+                                board: after_p2,
+                                previous_piece_placement: placement_2,
+                                previous_piece: original_piece_set[piece_set.indexOf(p2)],
+                                previous_move_was_clear: p2_move_was_clear,
+                                score: score_after_p2,
+                            },
+                        ]
+                    };
+                }
+            }
+        }
+    }
+    return result;
+}
+
+function ai_make_move_impl(game, piece_set) {
+    const board = game.board;
+    const result = {
+        evaluation: INF_SCORE,
+        new_game_states: Array(3).fill({ board: getFull(), previous_piece_placement: getEmpty() }),
+    };
+    const board_count = count(board);
+    let perm_index = 0;
+    for (const [p0, p1, p2] of get_piece_set_permutations_optimized(board, piece_set)) {
+        perm_index++;
+        const p0_count = count(p0);
+        const p1_count = count(p1);
+        const p2_count = count(p2);
+
+        for (const { placement: placement_0, board: after_p0 } of get_next_boards(board, p0, true)) {
+            for (const { placement: placement_1, board: after_p1 } of get_next_boards(after_p0, p1, true)) {
+                if (compare(p0, p1) > 0 && count(after_p1) == board_count + p0_count + p1_count) continue;
+                for (const { placement: placement_2, board: after_p2 } of get_next_boards(after_p1, p2)) {
+                    if (perm_index > 1 && count(after_p2) === board_count + p0_count + p1_count + p2_count) continue;
+                    const score = get_eval(after_p2, result.evaluation);
+                    if (score < result.evaluation) {
+                        result.evaluation = score;
+                        result.new_game_states = [
+                            { board: after_p0, previous_piece_placement: placement_0 },
+                            { board: after_p1, previous_piece_placement: placement_1 },
+                            { board: after_p2, previous_piece_placement: placement_2 },
+                        ];
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+function get_new_game() {
+    return {
+        board: getEmpty(),
+        previous_piece_placement: getEmpty(),
+        previous_piece: getEmpty(),
+        previous_move_was_clear: false,
+        score: 0,
+    };
+}
+
+function left_top_justify_piece(p) {
+    if (is_empty(p)) return p;
+    while (is_empty(and(p, row(0)))) p = shift_up(p);
+    while (is_empty(and(p, column(0)))) p = shift_left(p);
+    return p;
+}
+
+var blokie = {
+    getNewGame: get_new_game,
+    getEmptyPiece: getEmpty,
+    getAIMove: ai_make_move,
+    at: at,
+    toggleSquare: (board, r, c) => xor(board, bit(r, c)),
+    isEmpty: is_empty,
+};
+
+"use strict";
+
+const N = 9, P = 5;
+const board = Array.from({length:N}, () => Array(N).fill(false));
+const pieces = Array.from({length:3}, () => Array.from({length:P}, () => Array(P).fill(false)));
+
+let previewCells = [];
+let previewTimer = null;
+let pointerMode = null;
+let paintValue = true;
+let activePiece = -1;
+let lastCellKey = "";
+let currentScore = 0;
+
+const boardBody = document.getElementById("board-body");
+const pieceTables = [0,1,2].map(i => document.querySelector("#piece-on-deck-"+i+" tbody"));
+const scoreEl = document.getElementById("score");
+const resultEl = document.getElementById("result");
+const drawBtn = document.getElementById("pause-button");
+const speedEl = document.getElementById("speed");
+
+function makeBoard() {
+  boardBody.innerHTML = "";
+  for (let r=0;r<N;r++) {
+    const tr=document.createElement("tr");
+    for (let c=0;c<N;c++) {
+      const td=document.createElement("td");
+      td.dataset.r=r; td.dataset.c=c;
+      tr.appendChild(td);
+    }
+    boardBody.appendChild(tr);
+  }
+}
+function makePieces() {
+  pieceTables.forEach((tbody,pi)=>{
+    tbody.innerHTML="";
+    for(let r=0;r<P;r++){
+      const tr=document.createElement("tr");
+      for(let c=0;c<P;c++){
+        const td=document.createElement("td");
+        td.dataset.r=r; td.dataset.c=c; td.dataset.piece=pi;
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+  });
+}
+function renderBoard() {
+  boardBody.querySelectorAll("td").forEach(td=>{
+    const r=+td.dataset.r, c=+td.dataset.c;
+    td.classList.toggle("has-piece", !!board[r][c]);
+    td.classList.toggle("solution-preview", previewCells.some(x=>x.r===r && x.c===c));
+  });
+  scoreEl.textContent = currentScore;
+}
+function renderPieces() {
+  pieceTables.forEach((tbody,pi)=>{
+    tbody.querySelectorAll("td").forEach(td=>{
+      const r=+td.dataset.r,c=+td.dataset.c;
+      td.classList.toggle("has-piece",!!pieces[pi][r][c]);
+    });
+  });
+}
+
+function paintTarget(target) {
+  if(pointerMode==="board"){
+    const td=target.closest("#game-board td");
+    if(!td)return;
+    const r=+td.dataset.r,c=+td.dataset.c,key=r+","+c;
+    if(key===lastCellKey)return;
+    lastCellKey=key;
+    board[r][c]=paintValue;
+    previewCells=[]; renderBoard(); resultEl.textContent="";
+  } else if(pointerMode==="piece"){
+    const td=target.closest("table.pieces-on-deck td");
+    if(!td)return;
+    const pi=+td.dataset.piece,r=+td.dataset.r,c=+td.dataset.c,key=pi+":"+r+","+c;
+    if(pi!==activePiece || key===lastCellKey)return;
+    lastCellKey=key;
+    pieces[pi][r][c]=paintValue;
+    renderPieces(); resultEl.textContent="";
+  }
+}
+
+document.addEventListener("pointerdown",e=>{
+  const boardCell=e.target.closest("#game-board td");
+  const pieceCell=e.target.closest("table.pieces-on-deck td");
+  if(boardCell){
+    e.preventDefault();
+    pointerMode="board"; activePiece=-1; lastCellKey="";
+    const r=+boardCell.dataset.r,c=+boardCell.dataset.c;
+    paintValue=!board[r][c];
+    board[r][c]=paintValue;
+    lastCellKey=r+","+c;
+    previewCells=[]; renderBoard(); resultEl.textContent="";
+  } else if(pieceCell){
+    e.preventDefault();
+    pointerMode="piece"; activePiece=+pieceCell.dataset.piece; lastCellKey="";
+    const pi=activePiece,r=+pieceCell.dataset.r,c=+pieceCell.dataset.c;
+    paintValue=!pieces[pi][r][c];
+    pieces[pi][r][c]=paintValue;
+    lastCellKey=pi+":"+r+","+c;
+    renderPieces(); resultEl.textContent="";
+  }
+});
+document.addEventListener("pointermove",e=>{
+  if(!pointerMode || !(e.buttons&1))return;
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  if(el)paintTarget(el);
+});
+document.addEventListener("pointerup",()=>{pointerMode=null;activePiece=-1;lastCellKey=""});
+document.addEventListener("pointercancel",()=>{pointerMode=null;activePiece=-1;lastCellKey=""});
+
+function boardToBitboard() {
+  let bb = blokie.getEmptyPiece();
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++) {
+    if(board[r][c]) bb = blokie.toggleSquare(bb,r,c);
+  }
+  return bb;
+}
+function pieceToBitboard(piece) {
+  let bb = blokie.getEmptyPiece();
+  for(let r=0;r<P;r++) for(let c=0;c<P;c++) {
+    if(piece[r][c]) bb = blokie.toggleSquare(bb,r,c);
+  }
+  return bb;
+}
+function bitboardToCells(bb) {
+  const cells=[];
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++) {
+    if(blokie.at(bb,r,c)) cells.push({r,c});
+  }
+  return cells;
+}
+
+function setBoardFromBitboard(bb) {
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++) {
+    board[r][c] = blokie.at(bb, r, c);
+  }
+}
+
+function clearPiece(index) {
+  for(let r=0;r<P;r++) for(let c=0;c<P;c++) {
+    pieces[index][r][c] = false;
+  }
+}
+
+function runOriginalAI() {
+  let pieceSet = pieces.map(pieceToBitboard);
+  const filledCount = pieceSet.filter(p => !blokie.isEmpty(p)).length;
+
+  if (filledCount === 0) {
+    resultEl.textContent = "도형을 하나 이상 입력해주세요.";
+    return null;
+  }
+
+  const game = blokie.getNewGame();
+  game.board = boardToBitboard();
+  game.score = currentScore;
+  game.previous_move_was_clear = false;
+  game.previous_piece_placement = blokie.getEmptyPiece();
+  game.previous_piece = blokie.getEmptyPiece();
+
+  return {
+    result: blokie.getAIMove(game, pieceSet),
+    filledCount
+  };
+}
+
+function showOriginalSolution(aiResult) {
+  if(previewTimer) clearTimeout(previewTimer);
+
+  if(!aiResult || !aiResult.result) {
+    previewCells=[];
+    renderBoard();
+    drawBtn.classList.remove("active");
+    return;
+  }
+
+  const result = aiResult.result;
+  const states = result.new_game_states || [];
+
+  const steps = states.map(s => ({
+    cells: bitboardToCells(s.previous_piece_placement),
+    piece: s.previous_piece,
+    board: s.board,
+    score: s.score
+  })).filter(s => s.cells.length > 0);
+
+  if(steps.length === 0) {
+    previewCells=[];
+    renderBoard();
+    resultEl.textContent="현재 보드에서는 배치 가능한 위치를 찾지 못했습니다.";
+    drawBtn.classList.remove("active");
+    return;
+  }
+
+  // === 속도 조절 계산식 수정 부분 ===
+  // speed 슬라이더 값(1 ~ 10): 1일 때 1500ms(아주 천천히), 10일 때 150ms(매우 빠르게)
+  const speedVal = +speedEl.value;
+  const delay = 1650 - (speedVal * 150);
+  let i=0;
+
+  function next(){
+    if(i>=steps.length){
+      previewCells=[];
+      renderBoard();
+      renderPieces();
+      resultEl.textContent=`배치 완료 · ${steps.length}개 도형 배치 완료`;
+      drawBtn.classList.remove("active");
+      return;
+    }
+
+    const step = steps[i];
+    
+    // 1. 보드에 도형 정착
+    setBoardFromBitboard(step.board);
+    currentScore = step.score;
+
+    // 2. 사용된 도형은 아래 도형칸에서 삭제
+    const originalIndex = pieceSetIndexFromBitboard(step.piece, pieceSetForDisplay);
+    if(originalIndex >= 0) {
+      clearPiece(originalIndex);
+      pieceSetForDisplay[originalIndex] = blokie.getEmptyPiece();
+    }
+
+    renderBoard();
+    renderPieces();
+
+    resultEl.textContent=`${i+1}번째 배치 진행 중...`;
+    i++;
+    previewTimer=setTimeout(next,delay);
+  }
+
+  drawBtn.classList.add("active");
+  next();
+}
+
+let pieceSetForDisplay = [];
+function pieceSetIndexFromBitboard(piece, set) {
+  for(let i=0;i<set.length;i++) {
+    if(set[i] && piece.a===set[i].a && piece.b===set[i].b && piece.c===set[i].c) return i;
+  }
+  return -1;
+}
+
+drawBtn.addEventListener("click",e=>{
+  e.preventDefault();
+  resultEl.textContent="계산 및 배치 중...";
+  try {
+    pieceSetForDisplay=pieces.map(pieceToBitboard);
+    const result=runOriginalAI();
+    showOriginalSolution(result);
+  } catch(err) {
+    console.error(err);
+    if(previewTimer)clearTimeout(previewTimer);
+    drawBtn.classList.remove("active");
+    resultEl.textContent="계산 중 오류가 발생했습니다. 개발자 도구를 확인해 주세요.";
+  }
+});
+
+function resetAll(){
+  if(previewTimer)clearTimeout(previewTimer);
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)board[r][c]=false;
+  for(let p=0;p<3;p++)for(let r=0;r<P;r++)for(let c=0;c<P;c++)pieces[p][r][c]=false;
+  previewCells=[]; currentScore=0; scoreEl.textContent="0";
+  renderBoard(); renderPieces();
+  resultEl.textContent="초기화했습니다.";
+  drawBtn.classList.remove("active");
+}
+function showHelp(){
+  alert("9×9 보드와 아래 3개의 5×5 도형을 입력하세요.\n\n• 한 칸 클릭: 선택/해제\n• 마우스 버튼을 누른 채 드래그: 여러 칸 연속 선택\n• Draw: 최적 위치를 계산하여 보드에 바로 배치하며, 사용된 도형은 아래에서 사라집니다.");
+}
+function toggleDropdown(id){
+  const el=document.getElementById(id);
+  if(el)el.classList.toggle("open");
+}
+function toggleMobileMenu(){
+  const btn=document.querySelector(".site-mobile-menu-toggle");
+  if(btn)btn.classList.toggle("active");
+}
+document.addEventListener("click",e=>{
+  document.querySelectorAll(".site-nav-dropdown-content.open").forEach(x=>{
+    if(!x.closest(".site-nav-dropdown").contains(e.target))x.classList.remove("open");
+  });
+});
+
+makeBoard(); makePieces(); renderBoard(); renderPieces();
+
+</script>
+</body>
+</html>
