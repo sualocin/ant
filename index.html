@@ -104,35 +104,42 @@ button,input{font:inherit}
 #game-board tr:nth-child(n+4):nth-child(-n+6) td:nth-child(n+7),
 #game-board tr:nth-child(n+7) td:nth-child(n+4):nth-child(-n+6){background:#162c22}
 
-/* 보드 상의 기존 기본 블록 색상 */
+/* 보드 상의 기존 통일 블록 색상 */
 #game-board td.has-piece{
   background: linear-gradient(135deg, #4b6354, #2c3e34) !important;
   border: 1px solid #5c7867 !important;
   box-shadow: inset 1px 1px 2px #7a9c87, 0 0 5px rgba(0,0,0,0.5);
 }
 
-/* 각 도형별 고대비 색상 */
+/* ========================================================= */
+/* [신규 고대비 색상 정의] - 1:빨강 / 2:노랑 / 3:파랑            */
+/* ========================================================= */
+/* 1. 빨강 (Red) */
 #game-board td.color-0, #piece-on-deck-0 td.has-piece{
-  background: linear-gradient(135deg, #00c6ff, #0072ff) !important;
-  border: 1px solid #0048a8 !important;
-  box-shadow: inset 1px 1px 2px #b3f0ff, 0 0 8px rgba(0, 198, 255, 0.6);
+  background: linear-gradient(135deg, #ff3366, #ba000d) !important;
+  border: 1px solid #800000 !important;
+  box-shadow: inset 1px 1px 2px #ffb3c1, 0 0 8px rgba(255, 51, 102, 0.6);
 }
+
+/* 2. 노랑 (Yellow) */
 #game-board td.color-1, #piece-on-deck-1 td.has-piece{
-  background: linear-gradient(135deg, #ff9f43, #ee5253) !important;
-  border: 1px solid #b33939 !important;
-  box-shadow: inset 1px 1px 2px #ffeaa7, 0 0 8px rgba(255, 159, 67, 0.6);
+  background: linear-gradient(135deg, #ffea00, #ff9100) !important;
+  border: 1px solid #b26a00 !important;
+  box-shadow: inset 1px 1px 2px #fff9c4, 0 0 8px rgba(255, 234, 0, 0.7);
 }
+
+/* 3. 파랑 (Blue) */
 #game-board td.color-2, #piece-on-deck-2 td.has-piece{
-  background: linear-gradient(135deg, #e056fd, #686de0) !important;
-  border: 1px solid #4834d4 !important;
-  box-shadow: inset 1px 1px 2px #f8a5c2, 0 0 8px rgba(224, 86, 253, 0.6);
+  background: linear-gradient(135deg, #00d2ff, #0040ff) !important;
+  border: 1px solid #002699 !important;
+  box-shadow: inset 1px 1px 2px #b3f0ff, 0 0 8px rgba(0, 210, 255, 0.6);
 }
 
 /* 줄 삭제 시 0.5초 동안 강조되는 황금색 이펙트 */
 #game-board td.solution-line{
-  background: linear-gradient(135deg, #ffeaa7, #fdcb6e) !important;
-  border: 1px solid #e17055 !important;
-  box-shadow: inset 0 0 10px #fff, 0 0 18px #fdcb6e !important;
+  background: linear-gradient(135deg, #ffffff, #ffe066) !important;
+  border: 1px solid #ffaa00 !important;
+  box-shadow: inset 0 0 10px #fff, 0 0 20px #ffea00 !important;
   animation: pulse 0.25s infinite alternate;
 }
 
@@ -151,24 +158,33 @@ table.pieces-on-deck td{
   cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;
 }
 
-#pause-button-container{display:flex;justify-content:center;text-align:center;margin-top:6px}
-#pause-button{
+#pause-button-container{display:flex;justify-content:center;text-align:center;gap:10px;margin-top:6px}
+#pause-button, #undo-button{
   background:linear-gradient(180deg, #3d7e56 0%, #1f482f 100%);
-  color:#ffe9a9;border:1px solid #6cb885;padding:.75rem 2rem;
+  color:#ffe9a9;border:1px solid #6cb885;padding:.75rem 1.5rem;
   font-size:1.1rem;border-radius:22px;cursor:pointer;font-weight:700;
-  min-height:48px;min-width:160px;
+  min-height:48px;min-width:130px;
   box-shadow:0 4px 15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
   text-shadow:0 1px 2px rgba(0,0,0,0.8);
   transition:all 0.15s ease;
+}
+#undo-button{
+  background:linear-gradient(180deg, #39527a 0%, #1d2c47 100%);
+  color:#d0e3d7;border-color:#5678ab;
 }
 #pause-button:hover{
   background:linear-gradient(180deg, #479265 0%, #265739 100%);
   border-color:#81cb9a;
   box-shadow:0 4px 18px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.35);
 }
-#pause-button.active{
-  background:linear-gradient(180deg, #234f33 0%, #143320 100%);
-  color:#c7b37b;
+#undo-button:hover{
+  background:linear-gradient(180deg, #46639e 0%, #253961 100%);
+  border-color:#739ad4;
+  box-shadow:0 4px 18px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+#pause-button.active, #undo-button:active{
+  opacity: 0.8;
+  transform: translateY(1px);
 }
 .footer{text-align:center;font-size:13px;color:var(--dim);margin-top:4px}
 #speed-container{display:flex;align-items:center;justify-content:center;gap:9px}
@@ -200,7 +216,8 @@ table.pieces-on-deck td{
   #for-aspect-ratio{width:min(96vw,620px)}
   #game-board{border-width:2px}
   #pieces-on-deck-container{min-height:88px}
-  #pause-button{width:100%;max-width:280px}
+  #pause-button-container{width:100%}
+  #pause-button, #undo-button{flex:1;min-width:0;padding:.75rem .5rem}
   #speed{width:100%;flex:1}
 }
 </style>
@@ -253,6 +270,7 @@ table.pieces-on-deck td{
 
         <div id="pause-button-container">
           <button id="pause-button">배치</button>
+          <button id="undo-button">다시보기</button>
         </div>
 
         <div class="footer">
@@ -274,7 +292,6 @@ function setScale(scale, btn) {
   const wrapper = document.getElementById("zoom-wrapper");
   wrapper.style.transform = `scale(${scale})`;
   
-  // 버튼 활성화 상태 표시
   document.querySelectorAll(".scale-btn").forEach(b => b.classList.remove("active"));
   if(btn) btn.classList.add("active");
 }
@@ -935,8 +952,8 @@ var blokie = {
 "use strict";
 
 const N = 9, P = 5;
-const board = Array.from({length:N}, () => Array(N).fill(null));
-const pieces = Array.from({length:3}, () => Array.from({length:P}, () => Array(P).fill(false)));
+let board = Array.from({length:N}, () => Array(N).fill(null));
+let pieces = Array.from({length:3}, () => Array.from({length:P}, () => Array(P).fill(false)));
 
 let clearingCells = []; 
 let previewTimer = null;
@@ -946,11 +963,14 @@ let activePiece = -1;
 let lastCellKey = "";
 let currentScore = 0;
 
+let lastState = null;
+
 const boardBody = document.getElementById("board-body");
 const pieceTables = [0,1,2].map(i => document.querySelector("#piece-on-deck-"+i+" tbody"));
 const scoreEl = document.getElementById("score");
 const resultEl = document.getElementById("result");
 const drawBtn = document.getElementById("pause-button");
+const undoBtn = document.getElementById("undo-button");
 const speedEl = document.getElementById("speed");
 
 function makeBoard() {
@@ -1018,6 +1038,14 @@ function convertBoardToDefaultColor() {
     }
   }
   if(changed) renderBoard();
+}
+
+function saveCurrentState() {
+  lastState = {
+    board: board.map(row => [...row]),
+    pieces: pieces.map(p => p.map(row => [...row])),
+    score: currentScore
+  };
 }
 
 function paintTarget(target) {
@@ -1167,19 +1195,16 @@ function showOriginalSolution(aiResult) {
     const originalIndex = pieceSetIndexFromBitboard(step.piece, pieceSetForDisplay);
     const placedCells = bitboardToCells(step.placementBb);
 
-    // 1. 도형을 해당 색상으로 보드에 장착
     placedCells.forEach(({r, c}) => {
       board[r][c] = (originalIndex >= 0) ? originalIndex : true;
     });
 
-    // 2. 삭제될 완결 줄 찾기
     const currentBb = boardToBitboard();
     const removedBb = diff(currentBb, step.board);
     clearingCells = bitboardToCells(removedBb);
 
     renderBoard();
 
-    // 사용된 하단 입력 칸 도형 지우기
     if(originalIndex >= 0) {
       clearPiece(originalIndex);
       pieceSetForDisplay[originalIndex] = blokie.getEmptyPiece();
@@ -1188,11 +1213,9 @@ function showOriginalSolution(aiResult) {
 
     resultEl.textContent=`${i+1}번째 배치 진행 중...`;
 
-    // 3. 줄이 완성된 경우 0.5초(500ms) 동안 황금색 강조 표시 후 삭제 처리
     const clearDelay = clearingCells.length > 0 ? 500 : 0;
 
     setTimeout(() => {
-      // 0.5초 지연 후 삭제 상태 반영
       for(let r=0;r<N;r++) {
         for(let c=0;c<N;c++) {
           if(!blokie.at(step.board, r, c)) {
@@ -1205,13 +1228,11 @@ function showOriginalSolution(aiResult) {
       renderBoard();
 
       i++;
-      // 다음 단계로 넘어가기 전 속도 타이머 적용
       previewTimer = setTimeout(processNextStep, Math.max(50, delay - clearDelay));
     }, clearDelay);
   }
 
   drawBtn.classList.add("active");
-  // 배치 시작 시 사용자가 알아챌 수 있도록 0.8초(800ms)의 여유를 둔 후 첫 번째 배치 시작
   previewTimer = setTimeout(processNextStep, 800);
 }
 
@@ -1225,6 +1246,8 @@ function pieceSetIndexFromBitboard(piece, set) {
 
 drawBtn.addEventListener("click",e=>{
   e.preventDefault();
+  saveCurrentState();
+
   resultEl.textContent="계산 중... 잠시 후 배치가 시작됩니다.";
   try {
     pieceSetForDisplay=pieces.map(pieceToBitboard);
@@ -1238,17 +1261,38 @@ drawBtn.addEventListener("click",e=>{
   }
 });
 
+undoBtn.addEventListener("click", e => {
+  e.preventDefault();
+  if (!lastState) {
+    resultEl.textContent = "취소할 배치 기록이 없습니다.";
+    return;
+  }
+
+  if (previewTimer) clearTimeout(previewTimer);
+  clearingCells = [];
+  drawBtn.classList.remove("active");
+
+  board = lastState.board.map(row => [...row]);
+  pieces = lastState.pieces.map(p => p.map(row => [...row]));
+  currentScore = lastState.score;
+
+  renderBoard();
+  renderPieces();
+
+  resultEl.textContent = "방금 실행한 배치를 취소하고 이전 도형을 복원했습니다.";
+});
+
 function resetAll(){
   if(previewTimer)clearTimeout(previewTimer);
   for(let r=0;r<N;r++)for(let c=0;c<N;c++)board[r][c]=null;
   for(let p=0;p<3;p++)for(let r=0;r<P;r++)for(let c=0;c<P;c++)pieces[p][r][c]=false;
-  clearingCells=[]; currentScore=0; scoreEl.textContent="0";
+  clearingCells=[]; currentScore=0; scoreEl.textContent="0"; lastState=null;
   renderBoard(); renderPieces();
   resultEl.textContent="초기화했습니다.";
   drawBtn.classList.remove("active");
 }
 function showHelp(){
-  alert("9×9 보드와 아래 3개의 5×5 도형을 입력하세요.\n\n• 한 칸 클릭: 선택/해제\n• 마우스 버튼을 누른 채 드래그: 여러 칸 연속 선택\n• 배치: 최적 위치를 계산하여 보드에 고유 색상으로 배치되며, 줄이 맞춰지면 0.5초 강조 후 삭제됩니다.");
+  alert("9×9 보드와 아래 3개의 5×5 도형을 입력하세요.\n\n• 한 칸 클릭: 선택/해제\n• 마우스 버튼을 누른 채 드래그: 여러 칸 연속 선택\n• 배치: 최적 위치를 계산하여 보드에 고유 색상으로 배치됩니다.\n• 다시보기: 직전에 수행한 배치를 취소하고 보드 및 하단 도형을 이전 상태로 복원합니다.");
 }
 function toggleDropdown(id){
   const el=document.getElementById(id);
