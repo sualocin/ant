@@ -84,46 +84,38 @@ button,input{font:inherit}
 #game-board tr:nth-child(n+4):nth-child(-n+6) td:nth-child(n+7),
 #game-board tr:nth-child(n+7) td:nth-child(n+4):nth-child(-n+6){background:#162c22}
 
-/* 1. 보드 상의 기존 이미 잘 안착된 기본 블록 색상 (Muted Dark Moss Stone) */
+/* 보드 상의 기존 이미 잘 안착된 기본 블록 색상 */
 #game-board td.has-piece{
   background: linear-gradient(135deg, #4b6354, #2c3e34) !important;
   border: 1px solid #5c7867 !important;
   box-shadow: inset 1px 1px 2px #7a9c87, 0 0 5px rgba(0,0,0,0.5);
 }
 
-/* 2. 각 도형별 배치 진행 중 보드/도형 입력판 고대비 색상 정의 */
-/* 도형 0 (파랑 - Cyan Blue) */
+/* 각 도형별 고대비 색상 정의 */
 #game-board td.color-0, #piece-on-deck-0 td.has-piece{
   background: linear-gradient(135deg, #00c6ff, #0072ff) !important;
   border: 1px solid #0048a8 !important;
   box-shadow: inset 1px 1px 2px #b3f0ff, 0 0 8px rgba(0, 198, 255, 0.6);
 }
-/* 도형 1 (주황 - Amber Orange) */
 #game-board td.color-1, #piece-on-deck-1 td.has-piece{
   background: linear-gradient(135deg, #ff9f43, #ee5253) !important;
   border: 1px solid #b33939 !important;
   box-shadow: inset 1px 1px 2px #ffeaa7, 0 0 8px rgba(255, 159, 67, 0.6);
 }
-/* 도형 2 (보라 - Vivid Purple/Magenta) */
 #game-board td.color-2, #piece-on-deck-2 td.has-piece{
   background: linear-gradient(135deg, #e056fd, #686de0) !important;
   border: 1px solid #4834d4 !important;
   box-shadow: inset 1px 1px 2px #f8a5c2, 0 0 8px rgba(224, 86, 253, 0.6);
 }
 
-#game-board td.piece-pending{
-  background:linear-gradient(135deg, #f1c40f, #f39c12)!important;
-  border:1px solid #7e5109!important;
-  box-shadow:inset 1px 1px 2px #fdebd0, 0 0 8px rgba(241, 196, 15, 0.5);
-}
-#game-board td.solution-preview{
-  background: linear-gradient(135deg, #f1c40f, #f39c12) !important;
-  border: 1px solid #b7950b !important;
-  box-shadow: inset 1px 1px 2px #fef9e7, 0 0 10px rgba(241, 196, 15, 0.8);
-}
+/* 줄 삭제 시 0.2초 동안 강조되는 황금색 이펙트 */
 #game-board td.solution-line{
-  background:#f39c12!important;
+  background: linear-gradient(135deg, #ffeaa7, #fdcb6e) !important;
+  border: 1px solid #e17055 !important;
+  box-shadow: inset 0 0 8px #fff, 0 0 15px #fdcb6e !important;
+  animation: pulse 0.3s infinite alternate;
 }
+
 #pieces-on-deck-container{
   display:flex;width:100%;aspect-ratio:3/1;min-height:72px;gap:8px;
   user-select:none;-webkit-user-select:none;
@@ -904,11 +896,11 @@ var blokie = {
 "use strict";
 
 const N = 9, P = 5;
-// board State: null(빈칸), true(기본 통일 색상 블록), 0/1/2(최신 배치 진행 중인 도형 인덱스 색상)
+// board State: null(빈칸), true(기본 통일 색상 블록), 0/1/2(최신 배치 도형 인덱스)
 const board = Array.from({length:N}, () => Array(N).fill(null));
 const pieces = Array.from({length:3}, () => Array.from({length:P}, () => Array(P).fill(false)));
 
-let previewCells = [];
+let clearingCells = []; // 완성된 줄 딜레이 표시용
 let previewTimer = null;
 let pointerMode = null;
 let paintValue = true;
@@ -955,15 +947,15 @@ function renderBoard() {
     const r=+td.dataset.r, c=+td.dataset.c;
     const val = board[r][c];
 
-    td.classList.remove("has-piece", "color-0", "color-1", "color-2", "solution-preview");
+    td.classList.remove("has-piece", "color-0", "color-1", "color-2", "solution-line");
 
-    if (val === true) {
+    if (clearingCells.some(x => x.r === r && x.c === c)) {
+      td.classList.add("solution-line");
+    } else if (val === true) {
       td.classList.add("has-piece");
     } else if (typeof val === "number") {
       td.classList.add("color-" + val);
     }
-
-    td.classList.toggle("solution-preview", previewCells.some(x=>x.r===r && x.c===c));
   });
   scoreEl.textContent = currentScore;
 }
@@ -977,7 +969,7 @@ function renderPieces() {
   });
 }
 
-// 다음 도형 작성을 시작할 때, 9*9 판 상의 배치 완료된 임시 색상(0,1,2)을 모두 '기존색(true)'으로 일괄 변경
+// 다음 도형 작성을 시작할 때, 9*9 판 상의 최신 배치 블록(0,1,2)을 모두 '기존색(true)'으로 통일
 function convertBoardToDefaultColor() {
   let changed = false;
   for(let r=0;r<N;r++) {
@@ -999,7 +991,7 @@ function paintTarget(target) {
     if(key===lastCellKey)return;
     lastCellKey=key;
     board[r][c]=paintValue ? true : null;
-    previewCells=[]; renderBoard(); resultEl.textContent="";
+    renderBoard(); resultEl.textContent="";
   } else if(pointerMode==="piece"){
     const td=target.closest("table.pieces-on-deck td");
     if(!td)return;
@@ -1016,16 +1008,16 @@ document.addEventListener("pointerdown",e=>{
   const pieceCell=e.target.closest("table.pieces-on-deck td");
   if(boardCell){
     e.preventDefault();
-    convertBoardToDefaultColor(); // 작성 시작 시 기존 보드 블록 통일
+    convertBoardToDefaultColor();
     pointerMode="board"; activePiece=-1; lastCellKey="";
     const r=+boardCell.dataset.r,c=+boardCell.dataset.c;
     paintValue=!board[r][c];
     board[r][c]=paintValue ? true : null;
     lastCellKey=r+","+c;
-    previewCells=[]; renderBoard(); resultEl.textContent="";
+    renderBoard(); resultEl.textContent="";
   } else if(pieceCell){
     e.preventDefault();
-    convertBoardToDefaultColor(); // 작성 시작 시 기존 보드 블록 통일
+    convertBoardToDefaultColor();
     pointerMode="piece"; activePiece=+pieceCell.dataset.piece; lastCellKey="";
     const pi=activePiece,r=+pieceCell.dataset.r,c=+pieceCell.dataset.c;
     paintValue=!pieces[pi][r][c];
@@ -1064,22 +1056,6 @@ function bitboardToCells(bb) {
   return cells;
 }
 
-function updateBoardFromStep(stepPlacementBb, stepBoardBb, colorIdx) {
-  const placedCells = bitboardToCells(stepPlacementBb);
-  
-  placedCells.forEach(({r, c}) => {
-    board[r][c] = (colorIdx >= 0) ? colorIdx : true;
-  });
-
-  for(let r=0;r<N;r++) {
-    for(let c=0;c<N;c++) {
-      if(!blokie.at(stepBoardBb, r, c)) {
-        board[r][c] = null;
-      }
-    }
-  }
-}
-
 function clearPiece(index) {
   for(let r=0;r<P;r++) for(let c=0;c<P;c++) {
     pieces[index][r][c] = false;
@@ -1112,7 +1088,7 @@ function showOriginalSolution(aiResult) {
   if(previewTimer) clearTimeout(previewTimer);
 
   if(!aiResult || !aiResult.result) {
-    previewCells=[];
+    clearingCells=[];
     renderBoard();
     drawBtn.classList.remove("active");
     return;
@@ -1122,15 +1098,14 @@ function showOriginalSolution(aiResult) {
   const states = result.new_game_states || [];
 
   const steps = states.map(s => ({
-    cells: bitboardToCells(s.previous_piece_placement),
     placementBb: s.previous_piece_placement,
     piece: s.previous_piece,
     board: s.board,
     score: s.score
-  })).filter(s => s.cells.length > 0);
+  })).filter(s => !blokie.isEmpty(s.placementBb));
 
   if(steps.length === 0) {
-    previewCells=[];
+    clearingCells=[];
     renderBoard();
     resultEl.textContent="현재 보드에서는 배치 가능한 위치를 찾지 못했습니다.";
     drawBtn.classList.remove("active");
@@ -1141,9 +1116,9 @@ function showOriginalSolution(aiResult) {
   const delay = 3800 - (speedVal * 360);
   let i=0;
 
-  function next(){
+  function processNextStep(){
     if(i>=steps.length){
-      previewCells=[];
+      clearingCells=[];
       renderBoard();
       renderPieces();
       resultEl.textContent=`배치 완료 · ${steps.length}개 도형 배치 완료`;
@@ -1153,25 +1128,53 @@ function showOriginalSolution(aiResult) {
 
     const step = steps[i];
     const originalIndex = pieceSetIndexFromBitboard(step.piece, pieceSetForDisplay);
-    
-    updateBoardFromStep(step.placementBb, step.board, originalIndex);
-    currentScore = step.score;
+    const placedCells = bitboardToCells(step.placementBb);
 
+    // 1. 일단 도형을 해당 색상으로 보드에 장착
+    placedCells.forEach(({r, c}) => {
+      board[r][c] = (originalIndex >= 0) ? originalIndex : true;
+    });
+
+    // 2. 삭제될 완결 줄 찾기 (0.2초 딜레이 하이라이트용)
+    const currentBb = boardToBitboard();
+    const removedBb = diff(currentBb, step.board); // 삭제되는 영역 비트보드
+    clearingCells = bitboardToCells(removedBb);
+
+    renderBoard();
+
+    // 사용된 하단 입력 칸 도형 지우기
     if(originalIndex >= 0) {
       clearPiece(originalIndex);
       pieceSetForDisplay[originalIndex] = blokie.getEmptyPiece();
+      renderPieces();
     }
 
-    renderBoard();
-    renderPieces();
-
     resultEl.textContent=`${i+1}번째 배치 진행 중...`;
-    i++;
-    previewTimer=setTimeout(next,delay);
+
+    // 3. 줄이 완성된 경우 0.2초(200ms) 동안 강조 표시 후 삭제 처리
+    const clearDelay = clearingCells.length > 0 ? 200 : 0;
+
+    setTimeout(() => {
+      // 0.2초 지연 후 삭제된 비트보드 상태 반영
+      for(let r=0;r<N;r++) {
+        for(let c=0;c<N;c++) {
+          if(!blokie.at(step.board, r, c)) {
+            board[r][c] = null;
+          }
+        }
+      }
+      clearingCells = [];
+      currentScore = step.score;
+      renderBoard();
+
+      i++;
+      // 설정한 속도 타이머 후 다음 단계로
+      previewTimer = setTimeout(processNextStep, Math.max(50, delay - clearDelay));
+    }, clearDelay);
   }
 
   drawBtn.classList.add("active");
-  next();
+  processNextStep();
 }
 
 let pieceSetForDisplay = [];
@@ -1201,13 +1204,13 @@ function resetAll(){
   if(previewTimer)clearTimeout(previewTimer);
   for(let r=0;r<N;r++)for(let c=0;c<N;c++)board[r][c]=null;
   for(let p=0;p<3;p++)for(let r=0;r<P;r++)for(let c=0;c<P;c++)pieces[p][r][c]=false;
-  previewCells=[]; currentScore=0; scoreEl.textContent="0";
+  clearingCells=[]; currentScore=0; scoreEl.textContent="0";
   renderBoard(); renderPieces();
   resultEl.textContent="초기화했습니다.";
   drawBtn.classList.remove("active");
 }
 function showHelp(){
-  alert("9×9 보드와 아래 3개의 5×5 도형을 입력하세요.\n\n• 한 칸 클릭: 선택/해제\n• 마우스 버튼을 누른 채 드래그: 여러 칸 연속 선택\n• 배치: 최적 위치를 계산하여 보드에 고유 색상으로 배치되며, 다음 작성 시 기존 블록은 통일 색상으로 변경됩니다.");
+  alert("9×9 보드와 아래 3개의 5×5 도형을 입력하세요.\n\n• 한 칸 클릭: 선택/해제\n• 마우스 버튼을 누른 채 드래그: 여러 칸 연속 선택\n• 배치: 최적 위치를 계산하여 보드에 고유 색상으로 배치되며, 줄이 맞춰지면 0.2초 강조 후 삭제됩니다.");
 }
 function toggleDropdown(id){
   const el=document.getElementById(id);
