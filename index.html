@@ -225,21 +225,18 @@ table.pieces-on-deck td{
 <body>
 <nav class="site-navbar">
   <div class="site-nav-inner">
-    <a href="#" class="site-nav-brand-link" onclick="return false">
-      <span><span class="site-nav-title">개미족의 지혜 네모</span><span class="site-nav-subtitle">S454 마요 ₍ᵔ.ˬ.ᵔ₎</span></span>
+    <!-- 타이틀 (클릭 시 메인/초기화) -->
+    <a href="https://sualocin.github.io/ant/" class="site-nav-brand-link">
+      <span>
+        <span class="site-nav-title">개미족의 지혜 네모</span>
+        <span class="site-nav-subtitle">S454 마요 ₍ᵔ.ˬ.ᵔ₎</span>
+      </span>
     </a>
-    <button class="site-mobile-menu-toggle" type="button" onclick="toggleMobileMenu()" aria-label="메뉴">
-      <span></span><span></span><span></span>
-    </button>
+
+    <!-- 우측 버튼 2개 -->
     <div class="site-nav-links">
-      <a href="#" class="site-nav-link active" onclick="return false">개미족의 지혜 네모</a>
-      <div class="site-nav-dropdown">
-        <button class="site-nav-dropdown-toggle" onclick="toggleDropdown('help-menu')">도움말 ▼</button>
-        <div id="help-menu" class="site-nav-dropdown-content">
-          <a href="#" class="site-nav-dropdown-link" onclick="showHelp();return false">사용 방법</a>
-          <a href="#" class="site-nav-dropdown-link" onclick="resetAll();return false">초기화</a>
-        </div>
-      </div>
+      <a href="https://sualocin.github.io/ant/water_sort.html" class="site-nav-link">개미군단 워터소트 ↗</a>
+      <a href="#" class="site-nav-link" onclick="resetAll(); return false;">초기화</a>
     </div>
   </div>
 </nav>
