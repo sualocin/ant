@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>개미군단 - 워터 소트 솔버 V12</title>
+<style>
+/* === 기존 다크 테마 CSS 스펙 통합 === */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06110c;--bg-soft:#0d1d16;--card:#0f221b;--card2:#152b21;
+  --text:#e4ede7;--muted:#8ea89b;--dim:#5e786a;--line:#214032;
+  --line-strong:#39614c;--accent:#f3ca65;--orange:#e67e22;
+  --selected-flask:#4da6ff;
+  --unknown-color: #583122; 
+}
+html,body{min-height:100%;background:radial-gradient(circle at 50% 30%, #11261d 0%, #050e0a 100%);color:var(--text)}
+body{
+  font-family:"Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;
+  line-height:1.5;overflow-x:hidden;
+}
+button,input{font:inherit}
+
+.site-navbar{
+  position:sticky;top:0;z-index:20;background:#0c1c15f0;
+  border-bottom:1px solid #214233;backdrop-filter:blur(14px);
+}
+.site-nav-inner{
+  width:min(1200px,100%);margin:auto;min-height:58px;padding:8px 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.site-nav-brand-link{display:flex;align-items:center;gap:9px;color:var(--accent);text-decoration:none}
+.site-nav-title{font-size:18px;font-weight:700;letter-spacing:.04em;color:#f3ca65}
+.site-nav-subtitle{font-size:10px;color:var(--muted);display:block;line-height:1}
+.site-nav-links{display:flex;align-items:center;gap:6px}
+.site-nav-link{
+  color:#d0e3d7;text-decoration:none;border:0;background:transparent;
+  padding:8px 11px;border-radius:8px;cursor:pointer;font-size:14px;
+}
+.site-nav-link:hover{background:#ffffff0f}
+.site-nav-link.active{color:var(--accent);background:#ffffff0a}
+
+.container{width:min(1200px,100%);margin:auto;padding:18px 16px 35px}
+
+.scale-controls{
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;
+}
+.scale-btn{
+  background:#12261e;color:#8ea89b;border:1px solid #214032;
+  padding:4px 12px;font-size:12px;border-radius:12px;cursor:pointer;
+  transition:all 0.15s ease;
+}
+.scale-btn:hover{background:#1d3d2e;color:#ffe9a9}
+.scale-btn.active{background:#284c3a;color:#f3ca65;border-color:#3d7e56;font-weight:700}
+
+#zoom-wrapper{
+  width:100%;
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+}
+
+.card{
+  width:min(900px,100%); margin:auto;background:var(--card);
+  border:1px solid #2a4c3b;border-radius:20px;padding:20px;
+  box-shadow:0 10px 40px #000b, inset 0 0 15px rgba(0,0,0,0.6);
+}
+
+.section-title {
+  text-align: center; color: var(--accent); font-size: 20px; font-weight: 700;
+  margin-bottom: 15px; text-shadow: 0 0 10px rgba(243,202,101,0.3);
+}
+
+/* 상단 팔레트 */
+.palette-card-section {
+  background: var(--card2);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.instruction-text {
+  text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 12px;
+}
+.instruction-text b { color: var(--accent); }
+
+.color-palette {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+}
+
+.color-swatch-wrapper {
+  position: relative; width: 36px; height: 36px;
+}
+
+.color-swatch {
+  width: 100%; height: 100%; border-radius: 50%;
+  border: 2px solid #1a3328; cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.color-swatch.dark-text { color: #000; text-shadow: none; }
+.color-swatch:hover { transform: scale(1.15); border-color: var(--accent); }
+.color-swatch.selected-color {
+  border-color: #ff3366 !important;
+  box-shadow: 0 0 12px #ff3366;
+  transform: scale(1.1);
+}
+
+.color-swatch.eraser {
+  background: #173024; color: #ff5555; font-size: 18px; border: 2px dashed #39614c;
+}
+
+.color-swatch.unknown {
+  background: var(--unknown-color); 
+  color: #fff; font-size: 18px; border: 2px solid #8ea89b;
+}
+
+.custom-color-box {
+  display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--line); flex-wrap: wrap;
+}
+.custom-color-box input {
+  background: #091510; border: 1px solid var(--line-strong); color: #fff;
+  padding: 5px 10px; border-radius: 8px; width: 100px; text-align: center;
+  font-family: monospace; text-transform: uppercase; font-size: 13px;
+}
+.btn-sm {
+  background: #1f482f; color: var(--text); border: 1px solid var(--line-strong);
+  padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600;
+}
+.btn-sm:hover { background: #28573a; color: var(--accent); }
+.btn-del {
+  background: #4d1f27; color: #ffb3c1; border-color: #802f3e;
+}
+.btn-del:hover { background: #6b2635; color: #fff; }
+
+/* 하단 플라스크 */
+.flasks-container {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr)); 
+  gap: 12px; justify-items: center; margin-bottom: 20px; padding: 15px 10px;
+  background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--line);
+}
+
+@media (max-width: 1000px) {
+  .flasks-container { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; padding: 10px 5px; }
+  .flask { max-width: 100%; height: 130px; border-radius: 0 0 12px 12px; border-width: 2px; }
+  .flask-wrapper { gap: 4px; }
+  .flask-num { font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px #000; }
+}
+@media (max-width: 480px) {
+    .container { padding: 10px 8px; }
+    .card { padding: 15px 10px; border-radius: 16px; }
+    .flasks-container { gap: 5px; }
+    .flask { height: 110px; }
+}
+
+.flask-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%;}
+.flask-num { font-size: 12px; color: var(--dim); font-weight: bold; }
+
+.flask {
+  width: 100%; max-width: 48px; height: 160px;
+  background: rgba(10, 23, 17, 0.8);
+  border: 3px solid #3d7e56; border-top: 1px solid #3d7e56;
+  border-radius: 0 0 16px 16px;
+  display: flex; flex-direction: column-reverse;
+  overflow: hidden; cursor: pointer; position: relative;
+  box-shadow: inset 0 0 10px #000, 0 4px 12px rgba(0,0,0,0.5);
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.flask:hover { border-color: var(--dim); }
+
+.flask.selected {
+  border-color: var(--selected-flask) !important;
+  box-shadow: 0 0 20px rgba(77, 166, 255, 0.7), inset 0 0 8px rgba(77, 166, 255, 0.4);
+  transform: translateY(-5px); z-index: 1;
+}
+.flask.selected::before {
+  content: '▼'; position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+  color: var(--selected-flask); font-size: 16px; font-weight: bold;
+}
+
+.segment {
+  width: 100%; height: 25%;
+  border-top: 1px dashed rgba(255,255,255,0.1);
+  box-sizing: border-box; transition: background-color 0.1s ease;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold; color: rgba(255,255,255,0.7);
+}
+
+/* 버튼 */
+.controls-row {
+  display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;
+}
+.action-btn {
+  background: linear-gradient(180deg, #3d7e56 0%, #1f482f 100%);
+  color: #ffe9a9; border: 1px solid #6cb885; padding: .6rem 1.2rem;
+  font-size: 0.95rem; border-radius: 18px; cursor: pointer; font-weight: 700;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8); transition: all 0.15s ease;
+}
+.action-btn:hover { background: linear-gradient(180deg, #479265 0%, #265739 100%); border-color: #81cb9a; }
+.btn-red { background: linear-gradient(180deg, #9e3939 0%, #612525 100%); border-color: #d47373; color: #ffdddd; }
+.btn-red:hover { background: linear-gradient(180deg, #b84747 0%, #7a2d2d 100%); }
+.btn-orange { background: linear-gradient(180deg, #b87a39 0%, #6b431e 100%); border-color: #d4a373; color: #ffebd0; }
+.btn-orange:hover { background: linear-gradient(180deg, #cc8b45 0%, #805124 100%); }
+
+.flask-count-badge { font-size: 14px; color: var(--accent); font-weight: bold; margin: 0 5px; }
+
+/* === 결과창 컨테이너 === */
+.solution-container {
+    display: none;
+    margin-top: 20px; 
+    background: #091510;
+    border: 2px solid var(--line-strong); 
+    border-radius: 16px;
+    overflow: hidden; 
+    box-shadow: 0 10px 30px #000;
+}
+
+.tab-control-bar {
+    display: flex; 
+    background: #12261e; 
+    border-bottom: 2px solid var(--line-strong);
+}
+.tab-btn {
+    flex: 1; padding: 12px 0; background: none; border: none;
+    color: var(--dim); font-weight: 700; font-size: 14px; cursor: pointer;
+    transition: all 0.15s ease; text-align: center; position: relative;
+}
+.tab-btn:hover { color: var(--accent); background: #ffffff05; }
+.tab-btn.active { color: var(--accent); background: #ffffff0a; }
+.tab-btn.active::after {
+    content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+    height: 3px; background: var(--accent); border-radius: 3px 3px 0 0;
+}
+
+.solution-content-area { padding: 20px; }
+
+/* === [수정] 텍스트 답 세로 스크롤 제거 === */
+.result-text-panel {
+  max-height: none; /* 높이 제한 해제 */
+  overflow-y: visible; /* 스크롤바 제거 */
+  display: none;
+}
+.step-item {
+  padding: 12px 15px; border-bottom: 1px solid #173024;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 1.15rem; font-weight: 600; color: #fff;
+}
+.step-item:last-child { border-bottom: none; }
+.step-num { color: var(--accent); font-weight: 800; min-width: 30px; text-align: right; }
+.pour-arrow { color: var(--muted); font-weight: 400; margin: 0 4px; }
+.color-dot {
+    display: inline-block;
+    width: 22px; height: 22px; border-radius: 4px; 
+    border: 1px solid rgba(255,255,255,0.4);
+    margin-left: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* 이미지 답 패널 및 Canvas */
+.result-image-panel { 
+  display: block; 
+  text-align: center; 
+  overflow-x: hidden;
+  padding: 0;
+  width: 100%;
+}
+#solution-canvas {
+    max-width: 100%;
+    height: auto;
+    background: #091510;
+    box-shadow: none;
+    border: none;
+    border-radius: 8px;
+    display: block; 
+    margin: 0 auto;
+}
+@media (max-width: 768px) {
+    .solution-content-area { padding: 10px; }
+}
+
+</style>
+</head>
+<body>
+
+<nav class="site-navbar">
+  <div class="site-nav-inner">
+    <!-- 브랜드 타이틀 (클릭 시 워터소트 홈/초기화 역할) -->
+    <a href="#" class="site-nav-brand-link" onclick="resetAll(); return false;">
+      <span>
+        <span class="site-nav-title">개미군단 워터소트</span>
+        <span class="site-nav-subtitle">S454 마요 ₍ᵔ.ˬ.ᵔ₎</span>
+      </span>
+    </a>
+
+    <!-- 우측 상단 링크 메뉴 -->
+    <div class="site-nav-links">
+      <!-- 네모 로직 사이트 연결 (새 탭에서 열기) -->
+      <a href="https://sualocin.github.io/ant/" class="site-nav-link active" target="_blank" rel="noopener noreferrer">개미족의 지혜 네모 ↗</a>
+      <!-- 초기화 버튼 -->
+      <a href="#" class="site-nav-link" onclick="resetAll(); return false;">초기화</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="scale-controls">
+    <button type="button" class="scale-btn" onclick="setScale(0.85, this)">85%</button>
+    <button type="button" class="scale-btn active" onclick="setScale(1, this)">100%</button>
+    <button type="button" class="scale-btn" onclick="setScale(1.15, this)">115%</button>
+  </div>
+
+  <div id="zoom-wrapper">
+    <div class="card">
+      <div class="section-title">� 워터 소트 솔버 V12</div>
+
+      <!-- 상단 팔레트 -->
+      <div class="palette-card-section">
+        <div class="instruction-text" id="instruction-text">
+          <b>단계 1:</b> 아래 그리드에서 <b style="color:var(--selected-flask);">입력할 플라스크를 먼저 클릭</b>하세요.
+        </div>
+
+        <div class="color-palette" id="palette"></div>
+
+        <div class="custom-color-box">
+          <input type="text" id="custom-hex" placeholder="HEX 코드" maxlength="6">
+          <button class="btn-sm" onclick="addCustomColor()">+ 색상 추가</button>
+          <button class="btn-sm btn-del" onclick="deleteSelectedPaletteColor()">- 색상 삭제</button>
+        </div>
+      </div>
+
+      <!-- 하단 플라스크 그리드 -->
+      <div class="flasks-container" id="flasks-container"></div>
+
+      <!-- 컨트롤 버튼 -->
+      <div class="controls-row">
+        <button class="action-btn btn-red" onclick="removeFlask()">- 삭제</button>
+        <span class="flask-count-badge" id="flask-count-display">플라스크: 6개</span>
+        <button class="action-btn" onclick="addFlask()">+ 추가</button>
+        <button class="action-btn btn-orange" onclick="resetAll()" style="margin-left: 15px;">전체 초기화</button>
+        <button class="action-btn" onclick="solve()" id="solve-btn" style="background: linear-gradient(180deg, #d4a017 0%, #8a6400 100%); color: #fff; border-color: #f3ca65; font-size: 1.1rem; padding: 0.7rem 1.5rem;">배치 정답 구하기 🚀</button>
+      </div>
+
+      <!-- 정답 결과 컨테이너 -->
+      <div class="solution-container" id="solution-container">
+          <div class="tab-control-bar">
+              <button class="tab-btn active" id="tab-btn-image" onclick="setSolutionTab('image')">🎨 이미지 답</button>
+              <button class="tab-btn" id="tab-btn-text" onclick="setSolutionTab('text')">📄 텍스트 답</button>
+          </div>
+
+          <div class="solution-content-area">
+              <div class="result-image-panel" id="solution-output-image">
+                  <canvas id="solution-canvas"></canvas>
+              </div>
+
+              <div class="result-text-panel" id="solution-output-text"></div>
+          </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// 기본 색상 목록
+const initialColors = [
+  "A21A1A", "CF560D", "DBB06C", "659D5C", 
+  "0D670F", "3E7EC8", "332B7E", "9A059F", 
+  "F297E4", "58C9C7", "86661B", "959593"
+];
+
+let colors = [...initialColors];
+let selectedFlaskIndex = null;
+let selectedPaletteHex = null;
+let flaskCount = 6;
+let flasksData = [];
+
+function loadSavedColors() {
+  const saved = localStorage.getItem('watersort_custom_colors');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(c => {
+          if (!colors.includes(c)) colors.push(c);
+        });
+      }
+    } catch(e) {
+      console.error("저장된 색상을 불러오는 데 실패했습니다.", e);
+    }
+  }
+}
+
+function saveColorsToStorage() {
+  localStorage.setItem('watersort_custom_colors', JSON.stringify(colors));
+}
+
+function setScale(scale, btn) {
+  const wrapper = document.getElementById("zoom-wrapper");
+  wrapper.style.transform = `scale(${scale})`;
+  document.querySelectorAll(".scale-btn").forEach(b => b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+}
+
+function init() {
+  loadSavedColors();
+  flasksData = Array.from({ length: flaskCount }, () => []);
+  renderPalette();
+  renderFlasks();
+  updateInstructionText();
+}
+
+function updateInstructionText() {
+  const insText = document.getElementById('instruction-text');
+  if (selectedFlaskIndex === null) {
+    insText.innerHTML = `<b>단계 1:</b> 아래 그리드에서 <b style="color:var(--selected-flask);">입력할 플라스크를 먼저 클릭</b>하세요.`;
+  } else {
+    insText.innerHTML = `<b>단계 2:</b> 상단 팔레트에서 <b style="color:var(--accent);">채울 색상을 클릭</b>하여 <b>${selectedFlaskIndex + 1}번 플라스크</b>를 채우세요. 모르는 칸은 '?'를 쓰세요.`;
+  }
+}
+
+function getColorCountsFromBoard() {
+  const counts = {};
+  flasksData.forEach(flask => {
+    flask.forEach(color => {
+      if (color !== '?') {
+        counts[color] = (counts[color] || 0) + 1;
+      }
+    });
+  });
+  return counts;
+}
+
+function renderPalette() {
+  const paletteEl = document.getElementById('palette');
+  paletteEl.innerHTML = '';
+  const boardColorCounts = getColorCountsFromBoard();
+
+  // 지우개
+  const eraserWrapper = document.createElement('div');
+  eraserWrapper.className = 'color-swatch-wrapper';
+  const eraser = document.createElement('div');
+  eraser.className = `color-swatch eraser`;
+  eraser.innerText = '✕';
+  eraser.title = '선택된 플라스크의 맨 위 칸 지우기';
+  eraser.onclick = () => handleColorInput(null);
+  eraserWrapper.appendChild(eraser);
+  paletteEl.appendChild(eraserWrapper);
+
+  // 물음표
+  const unknownWrapper = document.createElement('div');
+  unknownWrapper.className = 'color-swatch-wrapper';
+  const unknown = document.createElement('div');
+  unknown.className = `color-swatch unknown`;
+  unknown.innerText = '?';
+  unknown.title = '모르는 색상 (물음표) 입력';
+  unknown.onclick = () => handleColorInput('?');
+  unknownWrapper.appendChild(unknown);
+  paletteEl.appendChild(unknownWrapper);
+
+  // 일반 색상
+  colors.forEach(hex => {
+    const swatchWrapper = document.createElement('div');
+    swatchWrapper.className = 'color-swatch-wrapper';
+
+    const swatch = document.createElement('div');
+    swatch.className = `color-swatch`;
+    if(["DBB06C", "959593", "F297E4", "58C9C7"].includes(hex)) {
+        swatch.classList.add('dark-text');
+    }
+    if (selectedPaletteHex === hex) {
+        swatch.classList.add('selected-color');
+    }
+    swatch.style.backgroundColor = `#${hex}`;
+    swatch.title = `#${hex}`;
+    swatch.onclick = () => handleColorInput(hex);
+
+    const count = boardColorCounts[hex] || 0;
+    swatch.innerText = count;
+
+    swatchWrapper.appendChild(swatch);
+    paletteEl.appendChild(swatchWrapper);
+  });
+}
+
+function renderFlasks() {
+  const container = document.getElementById('flasks-container');
+  container.innerHTML = '';
+
+  flasksData.forEach((flask, fIdx) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'flask-wrapper';
+
+    const flaskEl = document.createElement('div');
+    flaskEl.className = `flask ${selectedFlaskIndex === fIdx ? 'selected' : ''}`;
+    flaskEl.onclick = () => selectTargetFlask(fIdx);
+
+    for (let sIdx = 0; sIdx < 4; sIdx++) {
+      const seg = document.createElement('div');
+      seg.className = 'segment';
+      if (flask[sIdx]) {
+        if (flask[sIdx] === '?') {
+            seg.style.backgroundColor = 'var(--unknown-color)'; 
+            seg.innerText = '?';
+        } else {
+            seg.style.backgroundColor = `#${flask[sIdx]}`;
+            seg.innerText = '';
+        }
+      } else {
+        seg.innerText = '';
+      }
+      flaskEl.appendChild(seg);
+    }
+
+    const num = document.createElement('div');
+    num.className = 'flask-num';
+    num.innerText = fIdx + 1;
+
+    wrapper.appendChild(flaskEl);
+    wrapper.appendChild(num);
+    container.appendChild(wrapper);
+  });
+
+  document.getElementById('flask-count-display').innerText = `플라스크: ${flaskCount}개`;
+}
+
+function selectTargetFlask(flaskIdx) {
+  selectedFlaskIndex = (selectedFlaskIndex === flaskIdx) ? null : flaskIdx;
+  renderFlasks(); 
+  updateInstructionText();
+}
+
+function handleColorInput(hex) {
+  selectedPaletteHex = hex;
+  renderPalette();
+
+  if (selectedFlaskIndex === null) {
+    return;
+  }
+
+  let flask = flasksData[selectedFlaskIndex];
+
+  if (hex === null) {
+    if (flask.length > 0) flask.pop();
+  } else {
+    if (flask.length < 4) flask.push(hex);
+  }
+  renderFlasks(); 
+  renderPalette();
+}
+
+function addFlask() {
+  if (flaskCount < 16) {
+    flaskCount++;
+    flasksData.push([]);
+    selectedFlaskIndex = flasksData.length - 1;
+    renderFlasks();
+    updateInstructionText();
+  }
+}
+
+function removeFlask() {
+  if (flaskCount > 4) {
+    flaskCount--;
+    flasksData.pop();
+    if (selectedFlaskIndex >= flaskCount) selectedFlaskIndex = null;
+    renderFlasks();
+    renderPalette();
+    updateInstructionText();
+  }
+}
+
+function resetAll() {
+  flaskCount = 6;
+  flasksData = Array.from({ length: flaskCount }, () => []);
+  selectedFlaskIndex = null;
+  selectedPaletteHex = null;
+  document.getElementById('solution-container').style.display = 'none';
+  renderFlasks();
+  renderPalette();
+  updateInstructionText();
+}
+
+function addCustomColor() {
+  const input = document.getElementById('custom-hex');
+  let hex = input.value.trim().replace('#', '').toUpperCase();
+  if (hex.length === 6 && /^[0-9A-F]{6}$/i.test(hex)) {
+    if (!colors.includes(hex)) {
+      colors.push(hex);
+      saveColorsToStorage();
+      renderPalette();
+    }
+    input.value = '';
+  } else {
+    alert('6자리 HEX 코드를 입력해주세요. (예: FF0000)');
+  }
+}
+
+function deleteSelectedPaletteColor() {
+  if (!selectedPaletteHex || selectedPaletteHex === '?') {
+    alert('팔레트에서 삭제할 커스텀 색상을 먼저 클릭하여 선택해 주세요.');
+    return;
+  }
+
+  if (initialColors.includes(selectedPaletteHex)) {
+    alert('기본 제공 색상은 삭제할 수 없습니다.');
+    return;
+  }
+
+  if (confirm(`#${selectedPaletteHex} 색상을 팔레트에서 삭제하시겠습니까?`)) {
+    colors = colors.filter(c => c !== selectedPaletteHex);
+    selectedPaletteHex = null;
+    saveColorsToStorage();
+    renderPalette();
+  }
+}
+
+function setSolutionTab(tabType) {
+    const textPanel = document.getElementById('solution-output-text');
+    const imagePanel = document.getElementById('solution-output-image');
+    const textBtn = document.getElementById('tab-btn-text');
+    const imageBtn = document.getElementById('tab-btn-image');
+
+    if (tabType === 'text') {
+        textPanel.style.display = 'block';
+        imagePanel.style.display = 'none';
+        textBtn.classList.add('active');
+        imageBtn.classList.remove('active');
+    } else {
+        textPanel.style.display = 'none';
+        imagePanel.style.display = 'block';
+        textBtn.classList.remove('active');
+        imageBtn.classList.add('active');
+    }
+}
+
+// 물음표 색상 확률 추론 엔진
+function inferMissingColors(boardState) {
+    const currentState = boardState.map(f => [...f]);
+    const knownColorCounts = {};
+    const questionMarkPositions = [];
+    const colorResiduals = {};
+
+    currentState.forEach((flask, fIdx) => {
+        flask.forEach((color, sIdx) => {
+            if (color === '?') {
+                questionMarkPositions.push({fIdx, sIdx});
+            } else {
+                knownColorCounts[color] = (knownColorCounts[color] || 0) + 1;
+            }
+        });
+    });
+
+    if (questionMarkPositions.length === 0) return currentState;
+
+    const usedColors = [...new Set(currentState.flat().filter(c => c !== '?'))];
+    
+    usedColors.forEach(color => {
+        const remaining = 4 - (knownColorCounts[color] || 0);
+        if (remaining > 0) {
+            colorResiduals[color] = remaining;
+        } else if (remaining < 0) {
+            throw new Error(`모순 발생: 색상 #${color}이(가) 이미 ${knownColorCounts[color]}칸 사용되었습니다.`);
+        }
+    });
+
+    let totalResiduals = Object.values(colorResiduals).reduce((a,b) => a+b, 0);
+    if (totalResiduals !== questionMarkPositions.length) {
+         throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${totalResiduals})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
+    }
+
+    const sortedRemainingColors = Object.entries(colorResiduals).sort((a, b) => a[1] - b[1]);
+    const resolvedState = currentState.map(f => [...f]);
+    const resolvedPositions = new Set();
+
+    sortedRemainingColors.forEach(([color, amount]) => {
+        for(let c = 0; c < amount; c++) {
+            let bestPosIdx = -1;
+            let bestScore = -100;
+
+            questionMarkPositions.forEach((pos, idx) => {
+                if (resolvedPositions.has(idx)) return;
+
+                let score = 0;
+                if (pos.sIdx > 0) {
+                    const colorBelow = resolvedState[pos.fIdx][pos.sIdx - 1];
+                    if (colorBelow === color) score += 50;
+                    else if (colorBelow !== '?' && colorBelow !== color) score -= 10;
+                } else {
+                    score += 5;
+                }
+                
+                if (pos.sIdx < 3) {
+                    const colorAbove = currentState[pos.fIdx][pos.sIdx + 1];
+                    if (colorAbove !== '?' && colorAbove !== color) score -= 40;
+                }
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestPosIdx = idx;
+                }
+            });
+
+            if (bestPosIdx !== -1) {
+                const pos = questionMarkPositions[bestPosIdx];
+                resolvedState[pos.fIdx][pos.sIdx] = color;
+                resolvedPositions.add(bestPosIdx);
+            } else {
+                throw new Error(`모순 발생: 색상 #${color}을(를) 할당할 물음표 칸을 찾을 수 없습니다.`);
+            }
+        }
+    });
+
+    return resolvedState;
+}
+
+function solve() {
+  selectedFlaskIndex = null;
+  renderFlasks();
+  updateInstructionText();
+
+  const container = document.getElementById('solution-container');
+  const outputText = document.getElementById('solution-output-text');
+  
+  container.style.display = 'block';
+  setSolutionTab('image');
+  outputText.innerHTML = '<div style="text-align:center; color:var(--accent); padding:20px;">AI 추론 엔진 기동 중... 모르는 색상을 분석하고 풀이를 계산합니다. 🧠</div>';
+
+  const initialStateData = flasksData.map(f => [...f]);
+  let questionMarkCount = 0;
+  initialStateData.flat().forEach(c => { if(c === '?') questionMarkCount++; });
+
+  let totalUnits = initialStateData.flat().length;
+  if (totalUnits === 0) {
+    outputText.innerHTML = '<span style="color:#ff5555;">⚠️ 플라스크가 모두 비어있습니다.</span>';
+    setSolutionTab('text');
+    return;
+  }
+
+  let resolvedStateData;
+  try {
+      resolvedStateData = inferMissingColors(initialStateData);
+  } catch (error) {
+      outputText.innerHTML = `<span style="color:#ff5555; font-weight:bold;">❌ AI 추론 실패:</span> 입력된 정보 간에 모순이 발견되었습니다.<br><span style="color:var(--dim);">${error.message}</span>`;
+      setSolutionTab('text');
+      return;
+  }
+
+  let colorCounts = {};
+  resolvedStateData.forEach(f => {
+    f.forEach(c => colorCounts[c] = (colorCounts[c] || 0) + 1);
+  });
+
+  const invalidColors = [];
+  for (let c in colorCounts) {
+    if (colorCounts[c] !== 4) {
+        invalidColors.push(`<span class="color-dot" style="background:#${c};"></span>(#${c}, ${colorCounts[c]}칸)`);
+    }
+  }
+
+  if(invalidColors.length > 0) {
+    outputText.innerHTML = `<span style="color:#ff5555; font-weight:bold;">❌ 풀이 실패 (모순):</span> 추론된 색상 조합이 물 소트 규칙(각 색상 4칸)을 충족하지 못합니다.<br>${invalidColors.join(', ')}`;
+    setSolutionTab('text');
+    return;
+  }
+
+  function serialize(state) {
+    return state.map(f => f.join(',')).sort().join('|');
+  }
+
+  function isSolved(state) {
+    return state.every(f => f.length === 0 || (f.length === 4 && f.every(c => c === f[0])));
+  }
+
+  function getMoveableAmount(state, fromIdx, toIdx) {
+    const src = state[fromIdx];
+    const dest = state[toIdx];
+
+    if (fromIdx === toIdx || src.length === 0 || dest.length === 4) return 0;
+    const color = src[src.length - 1];
+
+    if (dest.length === 0) {
+      if (src.every(c => c === color) && src.length === 4) return 0;
+      let count = 0;
+      for(let i = src.length - 1; i >= 0; i--) {
+        if(src[i] === color) count++; else break;
+      }
+      return count;
+    }
+
+    if (dest[dest.length - 1] !== color) return 0;
+
+    let srcContCount = 0;
+    for(let i = src.length - 1; i >= 0; i--) {
+      if(src[i] === color) srcContCount++; else break;
+    }
+    return Math.min(srcContCount, 4 - dest.length);
+  }
+
+  function makeMove(state, fromIdx, toIdx, amount) {
+    const newState = state.map(f => [...f]);
+    const src = newState[fromIdx];
+    const dest = newState[toIdx];
+    for(let i = 0; i < amount; i++) {
+      dest.push(src.pop());
+    }
+    return newState;
+  }
+
+  let queue = [{ state: resolvedStateData, path: [] }];
+  let visited = new Set([serialize(resolvedStateData)]);
+  let foundPath = null;
+  const startTime = performance.now();
+
+  while (queue.length > 0) {
+    let { state, path } = queue.shift();
+
+    if (isSolved(state)) {
+      foundPath = path;
+      break;
+    }
+
+    if ((performance.now() - startTime) > 7000) break; 
+
+    for (let i = 0; i < state.length; i++) {
+      if (state[i].length === 0) continue;
+      for (let j = 0; j < state.length; j++) {
+        const amount = getMoveableAmount(state, i, j);
+        if (amount > 0) {
+          const nextState = makeMove(state, i, j, amount);
+          const key = serialize(nextState);
+
+          if (!visited.has(key)) {
+            visited.add(key);
+            queue.push({
+              state: nextState,
+              path: [...path, { from: i + 1, to: j + 1, color: state[i][state[i].length - 1], amount }]
+            });
+          }
+        }
+      }
+    }
+  }
+
+  if (foundPath) {
+    if (foundPath.length === 0) {
+      outputText.innerHTML = '<b style="color:var(--accent);">이미 모든 플라스크가 정리되었습니다! 🎉</b>';
+      setSolutionTab('text');
+    } else {
+      document.getElementById('solution-container').style.display = 'block';
+
+      let html = `<div style="padding-bottom:10px; border-bottom:2px solid #2a4c3b; margin-bottom:10px;"><b style="color:var(--accent); font-size:1.3rem;">총 ${foundPath.length}단계 정답 순서:</b></div>`;
+      foundPath.forEach((step, idx) => {
+        html += `<div class="step-item">
+          <span class="step-num">${idx+1}.</span>
+          <span><b>${step.from}번</b><span class="pour-arrow">➡️</span><b>${step.to}번</b></span>
+          <span class="color-dot" style="background:#${step.color};"></span>
+        </div>`;
+      });
+      outputText.innerHTML = html;
+
+      drawVisualSolutionImage(foundPath, resolvedStateData);
+      setSolutionTab('image');
+    }
+  } else {
+    document.getElementById('solution-container').style.display = 'block';
+    setSolutionTab('text');
+    outputText.innerHTML = '<span style="color:#ff5555; font-weight:bold;">❌ 풀이 실패:</span> 이 배치는 풀 수 없거나 탐색 시간이 초과되었습니다.';
+  }
+}
+
+function drawVisualSolutionImage(path, inferredBoardState) {
+    const canvas = document.getElementById('solution-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const initialState = inferredBoardState.map(f => [...f]);
+    const numFlasks = inferredBoardState.length;
+    const stepsToDisplay = [initialState];
+
+    let currentState = initialState;
+    path.forEach(move => {
+        const newState = currentState.map(f => [...f]);
+        const src = newState[move.from - 1];
+        const dest = newState[move.to - 1];
+        for(let i = 0; i < move.amount; i++) {
+            dest.push(src.pop());
+        }
+        stepsToDisplay.push(newState);
+        currentState = newState;
+    });
+
+    const isMobile = window.innerWidth <= 768;
+
+    let UNIT = isMobile ? 0.7 : 0.85;
+
+    const FLASK_WIDTH = 32 * UNIT;
+    const FLASK_GAP_X = 10 * UNIT;
+    const INNER_PADDING_X = 20 * UNIT;
+
+    const FLASK_HEIGHT = 100 * UNIT;
+    const SEGMENT_HEIGHT = FLASK_HEIGHT / 4;
+    const STEP_PADDING_TOP = 18 * UNIT;
+    const STEP_PADDING_BOTTOM = 18 * UNIT;
+    const LABEL_AREA_HEIGHT = 32 * UNIT;
+    const FINGER_ICON_AREA_HEIGHT = 32 * UNIT;
+    const FLASK_NUM_LABEL_HEIGHT = 22 * UNIT;
+
+    const ONE_STEP_HEIGHT = STEP_PADDING_TOP + LABEL_AREA_HEIGHT + FINGER_ICON_AREA_HEIGHT + FLASK_HEIGHT + FLASK_NUM_LABEL_HEIGHT + STEP_PADDING_BOTTOM;
+    
+    const totalFlasksWidth = (numFlasks * FLASK_WIDTH) + ((numFlasks - 1) * FLASK_GAP_X);
+    
+    const width = Math.max(750, totalFlasksWidth + (INNER_PADDING_X * 2));
+    const height = stepsToDisplay.length * ONE_STEP_HEIGHT;
+    
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.fillStyle = '#091510';
+    ctx.fillRect(0, 0, width, height);
+    ctx.textBaseline = 'top';
+
+    stepsToDisplay.forEach((boardState, stepIdx) => {
+        const stepY = stepIdx * ONE_STEP_HEIGHT;
+        
+        ctx.fillStyle = '#f3ca65';
+        ctx.font = `700 ${18 * UNIT}px "Segoe UI", Arial`;
+        ctx.textAlign = 'left';
+        ctx.fillText(`#${stepIdx + 1}`, INNER_PADDING_X, stepY + STEP_PADDING_TOP);
+
+        if(stepIdx > 0) {
+            ctx.strokeStyle = '#214032';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(10, stepY);
+            ctx.lineTo(width - 10, stepY);
+            ctx.stroke();
+        }
+
+        let currentMove = (stepIdx > 0 && stepIdx <= path.length) ? path[stepIdx - 1] : null;
+        const fingerIconY = stepY + STEP_PADDING_TOP + LABEL_AREA_HEIGHT;
+        
+        const startX = (width - totalFlasksWidth) / 2;
+
+        for (let flaskIdx = 0; flaskIdx < numFlasks; flaskIdx++) {
+            const flask = boardState[flaskIdx];
+            const flaskX = startX + (flaskIdx * (FLASK_WIDTH + FLASK_GAP_X));
+            const flaskY = fingerIconY + FINGER_ICON_AREA_HEIGHT;
+
+            ctx.strokeStyle = '#6cb885';
+            ctx.lineWidth = 2 * UNIT; 
+            const radius = 7 * UNIT;
+            
+            ctx.beginPath();
+            ctx.moveTo(flaskX, flaskY);
+            ctx.lineTo(flaskX + FLASK_WIDTH, flaskY);
+            ctx.lineTo(flaskX + FLASK_WIDTH, flaskY + FLASK_HEIGHT - radius);
+            ctx.quadraticCurveTo(flaskX + FLASK_WIDTH, flaskY + FLASK_HEIGHT, flaskX + FLASK_WIDTH - radius, flaskY + FLASK_HEIGHT);
+            ctx.lineTo(flaskX + radius, flaskY + FLASK_HEIGHT);
+            ctx.quadraticCurveTo(flaskX, flaskY + FLASK_HEIGHT, flaskX, flaskY + FLASK_HEIGHT - radius);
+            ctx.closePath();
+            
+            ctx.fillStyle = 'rgba(10, 23, 17, 0.8)';
+            ctx.fill();
+            ctx.stroke();
+
+            const innerFlaskX = flaskX + ctx.lineWidth;
+            const innerFlaskY = flaskY;
+            const innerFlaskWidth = FLASK_WIDTH - ctx.lineWidth * 2;
+            const innerFlaskHeight = FLASK_HEIGHT;
+
+            for (let segIdx = 0; segIdx < 4; segIdx++) {
+                const colorHex = flask[segIdx];
+                if (colorHex) {
+                    ctx.fillStyle = `#${colorHex}`;
+                    const segY = innerFlaskY + innerFlaskHeight - ((segIdx + 1) * SEGMENT_HEIGHT);
+                    
+                    if(segIdx === 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(innerFlaskX, segY);
+                        ctx.lineTo(innerFlaskX + innerFlaskWidth, segY);
+                        ctx.lineTo(innerFlaskX + innerFlaskWidth, innerFlaskY + innerFlaskHeight - radius);
+                        ctx.quadraticCurveTo(innerFlaskX + innerFlaskWidth, innerFlaskY + innerFlaskHeight, innerFlaskX + innerFlaskWidth - radius, innerFlaskY + innerFlaskHeight);
+                        ctx.lineTo(innerFlaskX + radius, innerFlaskY + innerFlaskHeight);
+                        ctx.quadraticCurveTo(innerFlaskX, innerFlaskY + innerFlaskHeight, innerFlaskX, innerFlaskY + innerFlaskHeight - radius);
+                        ctx.closePath();
+                        ctx.fill();
+                    } else {
+                        ctx.fillRect(innerFlaskX, segY, innerFlaskWidth, SEGMENT_HEIGHT);
+                    }
+
+                    if(segIdx < 3) {
+                        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+                        ctx.lineWidth = 1 * UNIT;
+                        ctx.beginPath();
+                        ctx.moveTo(innerFlaskX + 3, segY);
+                        ctx.lineTo(innerFlaskX + innerFlaskWidth - 3, segY);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            if(currentMove) {
+                ctx.font = `${24 * UNIT}px "Segoe UI", Arial`;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#fff';
+                
+                if (flaskIdx === currentMove.from - 1) {
+                    ctx.fillText('👆', flaskX + FLASK_WIDTH / 2, fingerIconY + 6 * UNIT);
+                } else if (flaskIdx === currentMove.to - 1) {
+                    ctx.fillText('👇', flaskX + FLASK_WIDTH / 2, fingerIconY + 6 * UNIT);
+                }
+            }
+
+            if (flask.length === 4 && flask.every(c => c === flask[0])) {
+                ctx.font = `${22 * UNIT}px "Segoe UI", Arial`;
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#fff';
+                ctx.fillText('👑', flaskX + FLASK_WIDTH / 2, flaskY - 24 * UNIT);
+            }
+
+            ctx.fillStyle = '#fff';
+            ctx.font = `800 ${15 * UNIT}px "Segoe UI", Arial`; 
+            ctx.textAlign = 'center';
+            const textY = flaskY + FLASK_HEIGHT + 6 * UNIT;
+            ctx.fillText(flaskIdx + 1, flaskX + FLASK_WIDTH / 2, textY);
+        }
+    });
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
