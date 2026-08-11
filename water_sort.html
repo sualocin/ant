@@ -864,7 +864,7 @@ function inferMissingColors(boardState) {
 
     let totalResiduals = Object.values(colorResiduals).reduce((a,b) => a+b, 0);
     if (totalResiduals !== questionMarkPositions.length) {
-         throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${totalResiduals})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
+        throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${totalResiduals})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
     }
 
     const sortedRemainingColors = Object.entries(colorResiduals).sort((a, b) => a[1] - b[1]);
@@ -1087,7 +1087,8 @@ function drawVisualSolutionImage(path, inferredBoardState) {
 
     const isMobile = window.innerWidth <= 768;
 
-    let UNIT = isMobile ? 0.7 : 0.85;
+    // 모바일에서 UNIT 값을 1.4로 변경하여 2배 확대 (기존 0.7)
+    let UNIT = isMobile ? 1.4 : 0.85;
 
     const FLASK_WIDTH = 32 * UNIT;
     const FLASK_GAP_X = 10 * UNIT;
@@ -1105,7 +1106,8 @@ function drawVisualSolutionImage(path, inferredBoardState) {
     
     const totalFlasksWidth = (numFlasks * FLASK_WIDTH) + ((numFlasks - 1) * FLASK_GAP_X);
     
-    const width = Math.max(750, totalFlasksWidth + (INNER_PADDING_X * 2));
+    // 모바일에서는 width를 totalFlasksWidth에 맞춰 유동적으로 설정
+    const width = isMobile ? totalFlasksWidth + (INNER_PADDING_X * 2) : Math.max(750, totalFlasksWidth + (INNER_PADDING_X * 2));
     const height = stepsToDisplay.length * ONE_STEP_HEIGHT;
     
     canvas.width = width;
