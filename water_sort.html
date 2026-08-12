@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="page-title">개미군단 - 과일주스 V12</title>
 <style>
-/* === 기존 다크 테마 CSS 스펙 통합 === */
+/* === 다크 테마 CSS 스펙 === */
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#06110c;--bg-soft:#0d1d16;--card:#0f221b;--card2:#152b21;
@@ -70,7 +70,7 @@ button,input{font:inherit}
   margin-bottom: 15px; text-shadow: 0 0 10px rgba(243,202,101,0.3);
 }
 
-/* 이미지 업로드 컨트롤 영역 */
+/* 이미지 업로드 영역 */
 .upload-card-section {
   background: var(--card2);
   border: 1px dashed var(--accent);
@@ -88,6 +88,7 @@ button,input{font:inherit}
   cursor: pointer;
   font-weight: bold;
   font-size: 14px;
+  border: none;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   transition: transform 0.1s ease;
 }
@@ -313,7 +314,6 @@ button,input{font:inherit}
 @media (max-width: 768px) {
     .solution-content-area { padding: 10px; }
 }
-
 </style>
 </head>
 <body>
@@ -344,12 +344,12 @@ button,input{font:inherit}
 
   <div id="zoom-wrapper">
     <div class="card">
-      <!-- 이미지 업로드 영역 -->
+      <!-- 이미지 업로드 영역 (버튼 클릭 트리거 수정 적용) -->
       <div class="upload-card-section">
-        <label class="upload-btn" data-i18n="uploadBtn">
-          📷 게임 스크린샷 선택하여 자동 인식
-          <input type="file" id="image-input" accept="image/*" onchange="processUploadedImage(event)" style="display:none;">
-        </label>
+        <button type="button" class="upload-btn" onclick="triggerFileUpload()" data-i18n="uploadBtn">
+          📷 게임 스크린샷 앨범에서 선택하여 자동 인식
+        </button>
+        <input type="file" id="image-input" accept="image/*" onchange="processUploadedImage(event)" style="display:none;">
         <div style="font-size: 11px; color: var(--muted); margin-top: 6px;" data-i18n="uploadDesc">
           스크린샷을 선택하면 빈병 수와 색상('?' 포함)을 자동으로 추출합니다. <br>
         </div>
@@ -411,7 +411,7 @@ const translations = {
     navTitle: "과일주스",
     navNemo: "네모",
     navReset: "초기화",
-    uploadBtn: "📷 게임 스크린샷 선택하여 자동 인식",
+    uploadBtn: "📷 게임 스크린샷 앨범에서 선택하여 자동 인식",
     uploadDesc: "스크린샷을 선택하면 빈병 수와 색상('?' 포함)을 자동으로 추출합니다. <br>",
     instruction1: (flaskIdx) => `<b>단계 1:</b> 아래 그리드에서 <b style="color:var(--selected-flask);">입력할 빈병을 먼저 클릭</b>하세요.`,
     instruction2: (flaskIdx) => `<b>단계 2:</b> 상단 팔레트에서 <b style="color:var(--accent);">채울 색상을 클릭</b>하여 <b>${flaskIdx + 1}번 빈병</b>을 채우세요. 모르는 칸은 '?'를 쓰세요.`,
@@ -775,6 +775,13 @@ function setSolutionTab(tabType) {
     }
 }
 
+/* === 버튼 클릭 시 파일 선택 팝업 강제 호출 === */
+function triggerFileUpload() {
+  const fileInput = document.getElementById('image-input');
+  fileInput.value = ''; // 동일 파일 재선택 허용
+  fileInput.click();    // 탐색기/갤러리 실행
+}
+
 /* === 고정밀 동적 스캔 및 자동 인식 알고리즘 === */
 function processUploadedImage(event) {
   const file = event.target.files[0];
@@ -893,7 +900,7 @@ function checkFlaskRimAt(ctx, x, y) {
   return (brightness / (sample.length / 4)) > 42;
 }
 
-// 빈 유리병/어두운 배경 감지 조건 강화
+// 빈 유리병/어두운 배경 감지
 function isTransparentGlassBg(r, g, b, pixels) {
   const brightness = (r + g + b) / 3;
   let hasWhiteText = false;

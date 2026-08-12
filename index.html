@@ -79,6 +79,7 @@ button,input{font:inherit}
   cursor: pointer;
   font-weight: bold;
   font-size: 14px;
+  border: none;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   transition: transform 0.1s ease;
 }
@@ -235,12 +236,12 @@ table.pieces-on-deck td{
     <div class="card">
       <div id="for-aspect-ratio">
 
-        <!-- 이미지 자동 인식 업로드 카드 -->
+        <!-- 이미지 자동 인식 업로드 카드 (버튼 클릭 트리거 방식 적용) -->
         <div class="upload-card-section">
-          <label class="upload-btn" data-i18n="uploadBtn">
+          <button type="button" class="upload-btn" onclick="triggerFileUpload()" data-i18n="uploadBtn">
             📷 게임 스크린샷 선택하여 자동 인식
-            <input type="file" id="image-input" accept="image/*" onchange="processUploadedNemoImage(event)" style="display:none;">
-          </label>
+          </button>
+          <input type="file" id="image-input" accept="image/*" onchange="processUploadedNemoImage(event)" style="display:none;">
           <div style="font-size: 11px; color: var(--muted); margin-top: 6px;" data-i18n="uploadDesc">
             스크린샷을 업로드하면 9×9 보드와 3개의 도형을 자동으로 판별하여 세팅합니다.<br>
             도형 인식을 잘못할 때가 있어요;;; 아직 테스트중이니 잘못되면 다시 그려주세욧!!
@@ -952,6 +953,13 @@ function resetAll(){
   resultEl.textContent = translations[currentLang].resetDone;
   msgDisplay.textContent = "";
   drawBtn.classList.remove("active");
+}
+
+/* === 버튼 클릭 시 파일 선택 팝업 강제 호출 === */
+function triggerFileUpload() {
+  const fileInput = document.getElementById('image-input');
+  fileInput.value = ''; // 동일 파일 재선택 허용
+  fileInput.click();    // 탐색기/갤러리 실행
 }
 
 function processUploadedNemoImage(event) {
