@@ -11,7 +11,7 @@
   --bg:#06110c;--bg-soft:#0d1d16;--card:#0f221b;--card2:#152b21;
   --text:#e4ede7;--muted:#8ea89b;--dim:#5e786a;--line:#214032;
   --line-strong:#39614c;--accent:#f3ca65;--orange:#e67e22;
-  --selected-flask:#4da6ff;
+  --selected-bottle:#4da6ff;
   --unknown-color: #583122; 
 }
 html,body{min-height:100%;background:radial-gradient(circle at 50% 30%, #11261d 0%, #050e0a 100%);color:var(--text)}
@@ -113,11 +113,12 @@ button,input{font:inherit}
 }
 
 .color-swatch-wrapper {
-  position: relative; width: 36px; height: 36px;
+  position: relative; width: 38px; height: 38px;
 }
 
+/* 색상 팔레트를 네모 형태로 변경 */
 .color-swatch {
-  width: 100%; height: 100%; border-radius: 50%;
+  width: 100%; height: 100%; border-radius: 8px;
   border: 2px solid #1a3328; cursor: pointer;
   transition: transform 0.15s, border-color 0.15s;
   box-shadow: 0 3px 8px rgba(0,0,0,0.4);
@@ -162,8 +163,8 @@ button,input{font:inherit}
 }
 .btn-del:hover { background: #6b2635; color: #fff; }
 
-/* 하단 플라스크 */
-.flasks-container {
+/* 하단 Clear Bottle 컨테이너 */
+.bottles-container {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr)); 
   gap: 12px; justify-items: center; margin-bottom: 20px; padding: 15px 10px;
@@ -171,22 +172,22 @@ button,input{font:inherit}
 }
 
 @media (max-width: 1000px) {
-  .flasks-container { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; padding: 10px 5px; }
-  .flask { max-width: 100%; height: 130px; border-radius: 0 0 12px 12px; border-width: 2px; }
-  .flask-wrapper { gap: 4px; }
-  .flask-num { font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px #000; }
+  .bottles-container { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; padding: 10px 5px; }
+  .bottle { max-width: 100%; height: 130px; border-radius: 0 0 12px 12px; border-width: 2px; }
+  .bottle-wrapper { gap: 4px; }
+  .bottle-num { font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px #000; }
 }
 @media (max-width: 480px) {
     .container { padding: 10px 8px; }
     .card { padding: 15px 10px; border-radius: 16px; }
-    .flasks-container { gap: 5px; }
-    .flask { height: 110px; }
+    .bottles-container { gap: 5px; }
+    .bottle { height: 110px; }
 }
 
-.flask-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%;}
-.flask-num { font-size: 12px; color: var(--dim); font-weight: bold; }
+.bottle-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%;}
+.bottle-num { font-size: 12px; color: var(--dim); font-weight: bold; }
 
-.flask {
+.bottle {
   width: 100%; max-width: 48px; height: 160px;
   background: rgba(10, 23, 17, 0.8);
   border: 3px solid #3d7e56; border-top: 1px solid #3d7e56;
@@ -196,16 +197,16 @@ button,input{font:inherit}
   box-shadow: inset 0 0 10px #000, 0 4px 12px rgba(0,0,0,0.5);
   transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
-.flask:hover { border-color: var(--dim); }
+.bottle:hover { border-color: var(--dim); }
 
-.flask.selected {
-  border-color: var(--selected-flask) !important;
+.bottle.selected {
+  border-color: var(--selected-bottle) !important;
   box-shadow: 0 0 20px rgba(77, 166, 255, 0.7), inset 0 0 8px rgba(77, 166, 255, 0.4);
   transform: translateY(-5px); z-index: 1;
 }
-.flask.selected::before {
+.bottle.selected::before {
   content: '▼'; position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
-  color: var(--selected-flask); font-size: 16px; font-weight: bold;
+  color: var(--selected-bottle); font-size: 16px; font-weight: bold;
 }
 
 .segment {
@@ -216,7 +217,7 @@ button,input{font:inherit}
   font-weight: bold; color: rgba(255,255,255,0.7);
 }
 
-/* 버튼 */
+/* 버튼 스타일 */
 .controls-row {
   display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;
 }
@@ -228,12 +229,16 @@ button,input{font:inherit}
   text-shadow: 0 1px 2px rgba(0,0,0,0.8); transition: all 0.15s ease;
 }
 .action-btn:hover { background: linear-gradient(180deg, #479265 0%, #265739 100%); border-color: #81cb9a; }
+.action-btn:disabled {
+  background: #152820; color: #4a6657; border-color: #1c3629; cursor: not-allowed;
+  box-shadow: none; text-shadow: none; transform: none !important;
+}
 .btn-red { background: linear-gradient(180deg, #9e3939 0%, #612525 100%); border-color: #d47373; color: #ffdddd; }
 .btn-red:hover { background: linear-gradient(180deg, #b84747 0%, #7a2d2d 100%); }
 .btn-orange { background: linear-gradient(180deg, #b87a39 0%, #6b431e 100%); border-color: #d4a373; color: #ffebd0; }
 .btn-orange:hover { background: linear-gradient(180deg, #cc8b45 0%, #805124 100%); }
 
-.flask-count-badge { font-size: 14px; color: var(--accent); font-weight: bold; margin: 0 5px; }
+.bottle-count-badge { font-size: 14px; color: var(--accent); font-weight: bold; margin: 0 5px; }
 
 /* 결과창 컨테이너 */
 .solution-container {
@@ -344,21 +349,21 @@ button,input{font:inherit}
 
   <div id="zoom-wrapper">
     <div class="card">
-      <!-- 이미지 업로드 영역 (버튼 클릭 트리거 수정 적용) -->
+      <!-- 이미지 업로드 영역 -->
       <div class="upload-card-section">
         <button type="button" class="upload-btn" onclick="triggerFileUpload()" data-i18n="uploadBtn">
           📷 게임 스크린샷 앨범에서 선택하여 자동 인식
         </button>
         <input type="file" id="image-input" accept="image/*" onchange="processUploadedImage(event)" style="display:none;">
         <div style="font-size: 11px; color: var(--muted); margin-top: 6px;" data-i18n="uploadDesc">
-          스크린샷을 선택하면 빈병 수와 색상('?' 포함)을 자동으로 추출합니다. <br>
+          스크린샷을 선택하면 빈 병 수와 색상('?' 포함)을 자동으로 추출합니다. <br>
         </div>
       </div>
 
       <!-- 상단 팔레트 -->
       <div class="palette-card-section">
         <div class="instruction-text" id="instruction-text">
-          <b>단계 1:</b> 아래 그리드에서 <b style="color:var(--selected-flask);">입력할 빈병을 먼저 클릭</b>하세요.
+          <b>단계 1:</b> 아래 그리드에서 <b style="color:var(--selected-bottle);">입력할 빈 병을 먼저 클릭</b>하세요.
         </div>
 
         <div class="color-palette" id="palette"></div>
@@ -370,15 +375,16 @@ button,input{font:inherit}
         </div>
       </div>
 
-      <!-- 하단 플라스크 그리드 -->
-      <div class="flasks-container" id="flasks-container"></div>
+      <!-- 하단 Clear Bottle 그리드 -->
+      <div class="bottles-container" id="bottles-container"></div>
 
       <!-- 컨트롤 버튼 -->
       <div class="controls-row">
-        <button class="action-btn btn-red" onclick="removeFlask()" data-i18n="btnRemove">- 삭제</button>
-        <span class="flask-count-badge" id="flask-count-display">빈병: 6개</span>
-        <button class="action-btn" onclick="addFlask()" data-i18n="btnAdd">+ 추가</button>
-        <button class="action-btn btn-orange" onclick="resetAll()" style="margin-left: 15px;" data-i18n="btnResetAll">전체 초기화</button>
+        <button class="action-btn btn-red" onclick="removeBottle()" data-i18n="btnRemove">- 삭제</button>
+        <span class="bottle-count-badge" id="bottle-count-display">Clear Bottle: 6개</span>
+        <button class="action-btn" onclick="addBottle()" data-i18n="btnAdd">+ 추가</button>
+        <button class="action-btn btn-orange" id="btn-reset-selected" onclick="resetSelectedBottle()" disabled data-i18n="btnResetSelected">선택 병 비우기</button>
+        <button class="action-btn btn-orange" onclick="resetAll()" data-i18n="btnResetAll">전체 초기화</button>
         <button class="action-btn" onclick="solve()" id="solve-btn" style="background: linear-gradient(180deg, #d4a017 0%, #8a6400 100%); color: #fff; border-color: #f3ca65; font-size: 1.1rem; padding: 0.7rem 1.5rem;" data-i18n="btnSolve">배치 정답 구하기 🚀</button>
       </div>
 
@@ -412,31 +418,32 @@ const translations = {
     navNemo: "네모",
     navReset: "초기화",
     uploadBtn: "📷 게임 스크린샷 앨범에서 선택하여 자동 인식",
-    uploadDesc: "스크린샷을 선택하면 빈병 수와 색상('?' 포함)을 자동으로 추출합니다. <br>",
-    instruction1: (flaskIdx) => `<b>단계 1:</b> 아래 그리드에서 <b style="color:var(--selected-flask);">입력할 빈병을 먼저 클릭</b>하세요.`,
-    instruction2: (flaskIdx) => `<b>단계 2:</b> 상단 팔레트에서 <b style="color:var(--accent);">채울 색상을 클릭</b>하여 <b>${flaskIdx + 1}번 빈병</b>을 채우세요. 모르는 칸은 '?'를 쓰세요.`,
+    uploadDesc: "스크린샷을 선택하면 빈 병 수와 색상('?' 포함)을 자동으로 추출합니다. <br>",
+    instruction1: (bottleIdx) => `<b>단계 1:</b> 아래 그리드에서 <b style="color:var(--selected-bottle);">입력할 빈 병을 먼저 클릭</b>하세요.`,
+    instruction2: (bottleIdx) => `<b>단계 2:</b> 상단 팔레트에서 <b style="color:var(--accent);">채울 색상을 클릭</b>하여 <b>${bottleIdx + 1}번 Clear Bottle</b>을 채우세요. 모르는 칸은 '?'를 쓰세요.`,
     btnAddColor: "+ 색상 추가",
     btnDelColor: "- 색상 삭제",
     btnRemove: "- 삭제",
     btnAdd: "+ 추가",
+    btnResetSelected: "선택 병 비우기",
     btnResetAll: "전체 초기화",
     btnSolve: "배치 정답 구하기 🚀",
     tabImage: "🎨 이미지 답",
     tabText: "📄 텍스트 답",
-    flaskCountText: (count) => `빈병: ${count}개`,
-    eraserTitle: "선택된 빈병의 맨 위 칸 지우기",
+    bottleCountText: (count) => `Clear Bottle: ${count}개`,
+    eraserTitle: "선택된 병의 맨 위 칸 지우기",
     unknownTitle: "모르는 색상 (물음표) 입력",
     customPlaceholder: "HEX 코드",
     customAlert: "6자리 HEX 코드를 입력해주세요. (예: FF0000)",
     delAlert1: "팔레트에서 삭제할 커스텀 색상을 먼저 클릭하여 선택해 주세요.",
     delAlert2: "기본 제공 색상은 삭제할 수 없습니다.",
     delConfirm: (hex) => `#${hex} 색상을 팔레트에서 삭제하시겠습니까?`,
-    analysisDone: (count) => `✨ 이미지 분석 완료! 총 ${count}개 병이 세팅되었습니다.`,
-    emptyFlasksWarn: "⚠️ 병이 모두 비어있습니다.",
+    analysisDone: (count) => `✨ 이미지 분석 완료! 총 ${count}개의 Clear Bottle이 세팅되었습니다.`,
+    emptyBottlesWarn: "⚠️ 병이 모두 비어있습니다.",
     engineRunning: "AI 추론 엔진 기동 중... 모르는 색상을 분석하고 풀이를 계산합니다. 🧠",
     inconsistencyErr: (msg) => `<span style="color:#ff5555; font-weight:bold;">❌ AI 추론 실패:</span> 입력된 정보 간에 모순이 발견되었습니다.<br><span style="color:var(--dim);">${msg}</span>`,
     ruleFailErr: (list) => `<span style="color:#ff5555; font-weight:bold;">❌ 풀이 실패 (모순):</span> 추론된 색상 조합이 과일주스 소트 규칙(각 색상 4칸)을 충족하지 못합니다.<br>${list}`,
-    alreadySolved: "이미 모든 병이 정리되었습니다! 🎉",
+    alreadySolved: "이미 모든 Clear Bottle이 정리되었습니다! 🎉",
     totalSteps: (count) => `총 ${count}단계 정답 순서:`,
     failTimeout: '<span style="color:#ff5555; font-weight:bold;">❌ 풀이 실패:</span> 이 배치는 풀 수 없거나 탐색 시간이 초과되었습니다.'
   },
@@ -446,31 +453,32 @@ const translations = {
     navNemo: "Nemo",
     navReset: "Reset",
     uploadBtn: "📷 Select Game Screenshot for Auto-Detection",
-    uploadDesc: "Select a screenshot to automatically extract the number of flasks and colors (including '?').<br>",
-    instruction1: (flaskIdx) => `<b>Step 1:</b> Click the <b style="color:var(--selected-flask);">flask you want to fill</b> from the grid below first.`,
-    instruction2: (flaskIdx) => `<b>Step 2:</b> Click a <b style="color:var(--accent);">color from the palette</b> above to fill <b>Flask #${flaskIdx + 1}</b>. Use '?' for unknown slots.`,
+    uploadDesc: "Select a screenshot to automatically extract the number of Clear Bottles and colors (including '?').<br>",
+    instruction1: (bottleIdx) => `<b>Step 1:</b> Click the <b style="color:var(--selected-bottle);">Clear Bottle you want to fill</b> from the grid below first.`,
+    instruction2: (bottleIdx) => `<b>Step 2:</b> Click a <b style="color:var(--accent);">color from the palette</b> above to fill <b>Clear Bottle #${bottleIdx + 1}</b>. Use '?' for unknown slots.`,
     btnAddColor: "+ Add Color",
     btnDelColor: "- Delete Color",
     btnRemove: "- Delete",
     btnAdd: "+ Add",
+    btnResetSelected: "Clear Bottle",
     btnResetAll: "Reset All",
     btnSolve: "Find Solution 🚀",
     tabImage: "🎨 Image Solution",
     tabText: "📄 Text Solution",
-    flaskCountText: (count) => `Flasks: ${count}`,
-    eraserTitle: "Clear top slot of selected flask",
+    bottleCountText: (count) => `Clear Bottles: ${count}`,
+    eraserTitle: "Clear top slot of selected bottle",
     unknownTitle: "Input unknown color (?)",
     customPlaceholder: "HEX Code",
     customAlert: "Please enter a 6-digit HEX code. (e.g., FF0000)",
     delAlert1: "Please click and select a custom color from the palette to delete.",
     delAlert2: "Default colors cannot be deleted.",
     delConfirm: (hex) => `Are you sure you want to delete #${hex} from the palette?`,
-    analysisDone: (count) => `✨ Image analysis complete! Total ${count} flasks set up.`,
-    emptyFlasksWarn: "⚠️ All flasks are empty.",
+    analysisDone: (count) => `✨ Image analysis complete! Total ${count} Clear Bottles set up.`,
+    emptyBottlesWarn: "⚠️ All Clear Bottles are empty.",
     engineRunning: "AI inference engine running... Analyzing unknown colors and calculating solution. 🧠",
     inconsistencyErr: (msg) => `<span style="color:#ff5555; font-weight:bold;">❌ AI Inference Failed:</span> Contradictions found in the input information.<br><span style="color:var(--dim);">${msg}</span>`,
     ruleFailErr: (list) => `<span style="color:#ff5555; font-weight:bold;">❌ Solution Failed (Contradiction):</span> The inferred color combination does not meet the fruit juice sort rule (4 slots per color).<br>${list}`,
-    alreadySolved: "All flasks are already sorted! 🎉",
+    alreadySolved: "All Clear Bottles are already sorted! 🎉",
     totalSteps: (count) => `Total ${count} steps solution sequence:`,
     failTimeout: '<span style="color:#ff5555; font-weight:bold;">❌ Solution Failed:</span> This arrangement cannot be solved or search timed out.'
   }
@@ -481,7 +489,7 @@ function toggleLanguage() {
   document.documentElement.lang = currentLang;
   updateTexts();
   renderPalette();
-  renderFlasks();
+  renderBottles();
   updateInstructionText();
 }
 
@@ -505,10 +513,10 @@ const initialColors = [
 ];
 
 let colors = [...initialColors];
-let selectedFlaskIndex = null;
+let selectedBottleIndex = null;
 let selectedPaletteHex = null;
-let flaskCount = 6;
-let flasksData = [];
+let bottleCount = 6;
+let bottlesData = [];
 
 function loadSavedColors() {
   const saved = localStorage.getItem('watersort_custom_colors');
@@ -539,9 +547,9 @@ function setScale(scale, btn) {
 
 function init() {
   loadSavedColors();
-  flasksData = Array.from({ length: flaskCount }, () => []);
+  bottlesData = Array.from({ length: bottleCount }, () => []);
   renderPalette();
-  renderFlasks();
+  renderBottles();
   updateInstructionText();
   updateTexts();
 }
@@ -549,17 +557,17 @@ function init() {
 function updateInstructionText() {
   const insText = document.getElementById('instruction-text');
   const t = translations[currentLang];
-  if (selectedFlaskIndex === null) {
-    insText.innerHTML = t.instruction1(selectedFlaskIndex);
+  if (selectedBottleIndex === null) {
+    insText.innerHTML = t.instruction1(selectedBottleIndex);
   } else {
-    insText.innerHTML = t.instruction2(selectedFlaskIndex);
+    insText.innerHTML = t.instruction2(selectedBottleIndex);
   }
 }
 
 function getColorCountsFromBoard() {
   const counts = {};
-  flasksData.forEach(flask => {
-    flask.forEach(color => {
+  bottlesData.forEach(bottle => {
+    bottle.forEach(color => {
       if (color !== '?') {
         counts[color] = (counts[color] || 0) + 1;
       }
@@ -621,51 +629,58 @@ function renderPalette() {
   });
 }
 
-function renderFlasks() {
-  const container = document.getElementById('flasks-container');
+function renderBottles() {
+  const container = document.getElementById('bottles-container');
   container.innerHTML = '';
   const t = translations[currentLang];
 
-  flasksData.forEach((flask, fIdx) => {
+  bottlesData.forEach((bottle, bIdx) => {
     const wrapper = document.createElement('div');
-    wrapper.className = 'flask-wrapper';
+    wrapper.className = 'bottle-wrapper';
 
-    const flaskEl = document.createElement('div');
-    flaskEl.className = `flask ${selectedFlaskIndex === fIdx ? 'selected' : ''}`;
-    flaskEl.onclick = () => selectTargetFlask(fIdx);
+    const bottleEl = document.createElement('div');
+    bottleEl.className = `bottle ${selectedBottleIndex === bIdx ? 'selected' : ''}`;
+    bottleEl.onclick = () => selectTargetBottle(bIdx);
 
     for (let sIdx = 0; sIdx < 4; sIdx++) {
       const seg = document.createElement('div');
       seg.className = 'segment';
-      if (flask[sIdx]) {
-        if (flask[sIdx] === '?') {
+      if (bottle[sIdx]) {
+        if (bottle[sIdx] === '?') {
             seg.style.backgroundColor = 'var(--unknown-color)'; 
             seg.innerText = '?';
         } else {
-            seg.style.backgroundColor = `#${flask[sIdx]}`;
+            seg.style.backgroundColor = `#${bottle[sIdx]}`;
             seg.innerText = '';
         }
       } else {
         seg.innerText = '';
       }
-      flaskEl.appendChild(seg);
+      bottleEl.appendChild(seg);
     }
 
     const num = document.createElement('div');
-    num.className = 'flask-num';
-    num.innerText = fIdx + 1;
+    num.className = 'bottle-num';
+    num.innerText = bIdx + 1;
 
-    wrapper.appendChild(flaskEl);
+    wrapper.appendChild(bottleEl);
     wrapper.appendChild(num);
     container.appendChild(wrapper);
   });
 
-  document.getElementById('flask-count-display').innerText = t.flaskCountText(flaskCount);
+  document.getElementById('bottle-count-display').innerText = t.bottleCountText(bottleCount);
+  
+  const resetSelectedBtn = document.getElementById('btn-reset-selected');
+  if (selectedBottleIndex !== null) {
+    resetSelectedBtn.removeAttribute('disabled');
+  } else {
+    resetSelectedBtn.setAttribute('disabled', 'true');
+  }
 }
 
-function selectTargetFlask(flaskIdx) {
-  selectedFlaskIndex = (selectedFlaskIndex === flaskIdx) ? null : flaskIdx;
-  renderFlasks(); 
+function selectTargetBottle(bottleIdx) {
+  selectedBottleIndex = (selectedBottleIndex === bottleIdx) ? null : bottleIdx;
+  renderBottles(); 
   updateInstructionText();
 }
 
@@ -673,49 +688,57 @@ function handleColorInput(hex) {
   selectedPaletteHex = hex;
   renderPalette();
 
-  if (selectedFlaskIndex === null) {
+  if (selectedBottleIndex === null) {
     return;
   }
 
-  let flask = flasksData[selectedFlaskIndex];
+  let bottle = bottlesData[selectedBottleIndex];
 
   if (hex === null) {
-    if (flask.length > 0) flask.pop();
+    if (bottle.length > 0) bottle.pop();
   } else {
-    if (flask.length < 4) flask.push(hex);
+    if (bottle.length < 4) bottle.push(hex);
   }
-  renderFlasks(); 
+  renderBottles(); 
   renderPalette();
 }
 
-function addFlask() {
-  if (flaskCount < 40) {
-    flaskCount++;
-    flasksData.push([]);
-    selectedFlaskIndex = flasksData.length - 1;
-    renderFlasks();
+function addBottle() {
+  if (bottleCount < 40) {
+    bottleCount++;
+    bottlesData.push([]);
+    selectedBottleIndex = bottlesData.length - 1;
+    renderBottles();
     updateInstructionText();
   }
 }
 
-function removeFlask() {
-  if (flaskCount > 4) {
-    flaskCount--;
-    flasksData.pop();
-    if (selectedFlaskIndex >= flaskCount) selectedFlaskIndex = null;
-    renderFlasks();
+function removeBottle() {
+  if (bottleCount > 4) {
+    bottleCount--;
+    bottlesData.pop();
+    if (selectedBottleIndex >= bottleCount) selectedBottleIndex = null;
+    renderBottles();
     renderPalette();
     updateInstructionText();
   }
 }
 
+function resetSelectedBottle() {
+  if (selectedBottleIndex !== null && bottlesData[selectedBottleIndex]) {
+    bottlesData[selectedBottleIndex] = [];
+    renderBottles();
+    renderPalette();
+  }
+}
+
 function resetAll() {
-  flaskCount = 6;
-  flasksData = Array.from({ length: flaskCount }, () => []);
-  selectedFlaskIndex = null;
+  bottleCount = 6;
+  bottlesData = Array.from({ length: bottleCount }, () => []);
+  selectedBottleIndex = null;
   selectedPaletteHex = null;
   document.getElementById('solution-container').style.display = 'none';
-  renderFlasks();
+  renderBottles();
   renderPalette();
   updateInstructionText();
 }
@@ -775,14 +798,12 @@ function setSolutionTab(tabType) {
     }
 }
 
-/* === 버튼 클릭 시 파일 선택 팝업 강제 호출 === */
 function triggerFileUpload() {
   const fileInput = document.getElementById('image-input');
-  fileInput.value = ''; // 동일 파일 재선택 허용
-  fileInput.click();    // 탐색기/갤러리 실행
+  fileInput.value = ''; 
+  fileInput.click();    
 }
 
-/* === 고정밀 동적 스캔 및 자동 인식 알고리즘 === */
 function processUploadedImage(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -790,7 +811,7 @@ function processUploadedImage(event) {
   const img = new Image();
   img.onload = function() {
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+	const ctx = canvas.getContext('2d', { willReadFrequently: true });
     canvas.width = img.width;
     canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
@@ -799,19 +820,16 @@ function processUploadedImage(event) {
     const h = img.height;
     const t = translations[currentLang];
 
-    // 1. Row 3에 빈병 입구(Rim)가 존재하는지 동적 감지
-    const check13 = checkFlaskRimAt(ctx, Math.floor(0.500 * w), Math.floor(0.635 * h));
-    const check14 = checkFlaskRimAt(ctx, Math.floor(0.428 * w), Math.floor(0.635 * h));
+    const check13 = checkBottleRimAt(ctx, Math.floor(0.500 * w), Math.floor(0.635 * h));
+    const check14 = checkBottleRimAt(ctx, Math.floor(0.428 * w), Math.floor(0.635 * h));
 
     let layouts = [
-      // ROW 1
       { xPct: 0.141, yBasePct: 0.368 },
       { xPct: 0.285, yBasePct: 0.368 },
       { xPct: 0.428, yBasePct: 0.368 },
       { xPct: 0.572, yBasePct: 0.368 },
       { xPct: 0.715, yBasePct: 0.368 },
       { xPct: 0.859, yBasePct: 0.368 },
-      // ROW 2
       { xPct: 0.141, yBasePct: 0.560 },
       { xPct: 0.285, yBasePct: 0.560 },
       { xPct: 0.428, yBasePct: 0.560 },
@@ -831,7 +849,7 @@ function processUploadedImage(event) {
     let detectedData = [];
 
     layouts.forEach((pos) => {
-      let flask = [];
+      let bottle = [];
       const centerX = Math.floor(pos.xPct * w);
 
       let rawSegments = [];
@@ -857,10 +875,8 @@ function processUploadedImage(event) {
         rawSegments.push({ avgR, avgG, avgB, pixels });
       }
 
-      // 1) 플라스크 전체가 비어있는지(Empty Flask) 정밀 스캔
       const emptyCount = rawSegments.filter(seg => isTransparentGlassBg(seg.avgR, seg.avgG, seg.avgB, seg.pixels)).length;
       
-      // 4칸 중 3칸 이상이 유리 배경이면 빈 병으로 간주
       if (emptyCount >= 3) {
         detectedData.push([]); 
       } else {
@@ -868,30 +884,30 @@ function processUploadedImage(event) {
           if (isTransparentGlassBg(seg.avgR, seg.avgG, seg.avgB, seg.pixels)) {
             return;
           } else if (isQuestionMarkSegment(seg.avgR, seg.avgG, seg.avgB, seg.pixels)) {
-            flask.push('?');
+            bottle.push('?');
           } else {
             const matchedHex = findClosestColor(seg.avgR, seg.avgG, seg.avgB);
-            flask.push(matchedHex);
+            bottle.push(matchedHex);
           }
         });
-        detectedData.push(flask);
+        detectedData.push(bottle);
       }
     });
 
-    flaskCount = detectedData.length;
-    flasksData = detectedData;
-    selectedFlaskIndex = null;
+    bottleCount = detectedData.length;
+    bottlesData = detectedData;
+    selectedBottleIndex = null;
 
-    renderFlasks();
+    renderBottles();
     renderPalette();
     updateInstructionText();
-    alert(t.analysisDone(flaskCount));
+    alert(t.analysisDone(bottleCount));
   };
 
   img.src = URL.createObjectURL(file);
 }
 
-function checkFlaskRimAt(ctx, x, y) {
+function checkBottleRimAt(ctx, x, y) {
   const sample = ctx.getImageData(x - 2, y - 2, 5, 5).data;
   let brightness = 0;
   for (let i = 0; i < sample.length; i += 4) {
@@ -900,7 +916,6 @@ function checkFlaskRimAt(ctx, x, y) {
   return (brightness / (sample.length / 4)) > 42;
 }
 
-// 빈 유리병/어두운 배경 감지
 function isTransparentGlassBg(r, g, b, pixels) {
   const brightness = (r + g + b) / 3;
   let hasWhiteText = false;
@@ -953,10 +968,10 @@ function inferMissingColors(boardState) {
     const questionMarkPositions = [];
     const colorResiduals = {};
 
-    currentState.forEach((flask, fIdx) => {
-        flask.forEach((color, sIdx) => {
+    currentState.forEach((bottle, bIdx) => {
+        bottle.forEach((color, sIdx) => {
             if (color === '?') {
-                questionMarkPositions.push({fIdx, sIdx});
+                questionMarkPositions.push({bIdx, sIdx});
             } else {
                 knownColorCounts[color] = (knownColorCounts[color] || 0) + 1;
             }
@@ -995,7 +1010,7 @@ function inferMissingColors(boardState) {
 
                 let score = 0;
                 if (pos.sIdx > 0) {
-                    const colorBelow = resolvedState[pos.fIdx][pos.sIdx - 1];
+                    const colorBelow = resolvedState[pos.bIdx][pos.sIdx - 1];
                     if (colorBelow === color) {
                         score -= 100; 
                     } else if (colorBelow !== '?' && colorBelow !== color) {
@@ -1006,7 +1021,7 @@ function inferMissingColors(boardState) {
                 }
                 
                 if (pos.sIdx < 3) {
-                    const colorAbove = currentState[pos.fIdx][pos.sIdx + 1];
+                    const colorAbove = currentState[pos.bIdx][pos.sIdx + 1];
                     if (colorAbove !== '?' && colorAbove !== color) score -= 40;
                 }
 
@@ -1018,7 +1033,7 @@ function inferMissingColors(boardState) {
 
             if (bestPosIdx !== -1) {
                 const pos = questionMarkPositions[bestPosIdx];
-                resolvedState[pos.fIdx][pos.sIdx] = color;
+                resolvedState[pos.bIdx][pos.sIdx] = color;
                 resolvedPositions.add(bestPosIdx);
             } else {
                 throw new Error(`모순 발생: 색상 #${color}을(를) 할당할 물음표 칸을 찾을 수 없습니다.`);
@@ -1030,8 +1045,8 @@ function inferMissingColors(boardState) {
 }
 
 function solve() {
-  selectedFlaskIndex = null;
-  renderFlasks();
+  selectedBottleIndex = null;
+  renderBottles();
   updateInstructionText();
 
   const container = document.getElementById('solution-container');
@@ -1042,11 +1057,11 @@ function solve() {
   setSolutionTab('image');
   outputText.innerHTML = `<div style="text-align:center; color:var(--accent); padding:20px;">${t.engineRunning}</div>`;
 
-  const initialStateData = flasksData.map(f => [...f]);
+  const initialStateData = bottlesData.map(f => [...f]);
 
   let totalUnits = initialStateData.flat().length;
   if (totalUnits === 0) {
-    outputText.innerHTML = `<span style="color:#ff5555;">${t.emptyFlasksWarn}</span>`;
+    outputText.innerHTML = `<span style="color:#ff5555;">${t.emptyBottlesWarn}</span>`;
     setSolutionTab('text');
     return;
   }
@@ -1188,7 +1203,7 @@ function drawVisualSolutionImage(path, inferredBoardState) {
     const ctx = canvas.getContext('2d');
 
     const initialState = inferredBoardState.map(f => [...f]);
-    const numFlasks = inferredBoardState.length;
+    const numBottles = inferredBoardState.length;
     const stepsToDisplay = [initialState];
 
     let currentState = initialState;
@@ -1207,23 +1222,23 @@ function drawVisualSolutionImage(path, inferredBoardState) {
 
     let UNIT = isMobile ? 1.4 : 0.85;
 
-    const FLASK_WIDTH = 32 * UNIT;
-    const FLASK_GAP_X = 10 * UNIT;
+    const BOTTLE_WIDTH = 32 * UNIT;
+    const BOTTLE_GAP_X = 10 * UNIT;
     const INNER_PADDING_X = 20 * UNIT;
 
-    const FLASK_HEIGHT = 100 * UNIT;
-    const SEGMENT_HEIGHT = FLASK_HEIGHT / 4;
+    const BOTTLE_HEIGHT = 100 * UNIT;
+    const SEGMENT_HEIGHT = BOTTLE_HEIGHT / 4;
     const STEP_PADDING_TOP = 18 * UNIT;
     const STEP_PADDING_BOTTOM = 18 * UNIT;
     const LABEL_AREA_HEIGHT = 32 * UNIT;
     const FINGER_ICON_AREA_HEIGHT = 32 * UNIT;
-    const FLASK_NUM_LABEL_HEIGHT = 22 * UNIT;
+    const BOTTLE_NUM_LABEL_HEIGHT = 22 * UNIT;
 
-    const ONE_STEP_HEIGHT = STEP_PADDING_TOP + LABEL_AREA_HEIGHT + FINGER_ICON_AREA_HEIGHT + FLASK_HEIGHT + FLASK_NUM_LABEL_HEIGHT + STEP_PADDING_BOTTOM;
+    const ONE_STEP_HEIGHT = STEP_PADDING_TOP + LABEL_AREA_HEIGHT + FINGER_ICON_AREA_HEIGHT + BOTTLE_HEIGHT + BOTTLE_NUM_LABEL_HEIGHT + STEP_PADDING_BOTTOM;
     
-    const totalFlasksWidth = (numFlasks * FLASK_WIDTH) + ((numFlasks - 1) * FLASK_GAP_X);
+    const totalBottlesWidth = (numBottles * BOTTLE_WIDTH) + ((numBottles - 1) * BOTTLE_GAP_X);
     
-    const width = isMobile ? totalFlasksWidth + (INNER_PADDING_X * 2) : Math.max(750, totalFlasksWidth + (INNER_PADDING_X * 2));
+    const width = isMobile ? totalBottlesWidth + (INNER_PADDING_X * 2) : Math.max(750, totalBottlesWidth + (INNER_PADDING_X * 2));
     const height = stepsToDisplay.length * ONE_STEP_HEIGHT;
     
     canvas.width = width;
@@ -1253,61 +1268,61 @@ function drawVisualSolutionImage(path, inferredBoardState) {
         let currentMove = (stepIdx > 0 && stepIdx <= path.length) ? path[stepIdx - 1] : null;
         const fingerIconY = stepY + STEP_PADDING_TOP + LABEL_AREA_HEIGHT;
         
-        const startX = (width - totalFlasksWidth) / 2;
+        const startX = (width - totalBottlesWidth) / 2;
 
-        for (let flaskIdx = 0; flaskIdx < numFlasks; flaskIdx++) {
-            const flask = boardState[flaskIdx];
-            const flaskX = startX + (flaskIdx * (FLASK_WIDTH + FLASK_GAP_X));
-            const flaskY = fingerIconY + FINGER_ICON_AREA_HEIGHT;
+        for (let bottleIdx = 0; bottleIdx < numBottles; bottleIdx++) {
+            const bottle = boardState[bottleIdx];
+            const bottleX = startX + (bottleIdx * (BOTTLE_WIDTH + BOTTLE_GAP_X));
+            const bottleY = fingerIconY + FINGER_ICON_AREA_HEIGHT;
 
             ctx.strokeStyle = '#6cb885';
             ctx.lineWidth = 2 * UNIT; 
             const radius = 7 * UNIT;
             
             ctx.beginPath();
-            ctx.moveTo(flaskX, flaskY);
-            ctx.lineTo(flaskX + FLASK_WIDTH, flaskY);
-            ctx.lineTo(flaskX + FLASK_WIDTH, flaskY + FLASK_HEIGHT - radius);
-            ctx.quadraticCurveTo(flaskX + FLASK_WIDTH, flaskY + FLASK_HEIGHT, flaskX + FLASK_WIDTH - radius, flaskY + FLASK_HEIGHT);
-            ctx.lineTo(flaskX + radius, flaskY + FLASK_HEIGHT);
-            ctx.quadraticCurveTo(flaskX, flaskY + FLASK_HEIGHT, flaskX, flaskY + FLASK_HEIGHT - radius);
+            ctx.moveTo(bottleX, bottleY);
+            ctx.lineTo(bottleX + BOTTLE_WIDTH, bottleY);
+            ctx.lineTo(bottleX + BOTTLE_WIDTH, bottleY + BOTTLE_HEIGHT - radius);
+            ctx.quadraticCurveTo(bottleX + BOTTLE_WIDTH, bottleY + BOTTLE_HEIGHT, bottleX + BOTTLE_WIDTH - radius, bottleY + BOTTLE_HEIGHT);
+            ctx.lineTo(bottleX + radius, bottleY + BOTTLE_HEIGHT);
+            ctx.quadraticCurveTo(bottleX, bottleY + BOTTLE_HEIGHT, bottleX, bottleY + BOTTLE_HEIGHT - radius);
             ctx.closePath();
             
             ctx.fillStyle = 'rgba(10, 23, 17, 0.8)';
             ctx.fill();
             ctx.stroke();
 
-            const innerFlaskX = flaskX + ctx.lineWidth;
-            const innerFlaskY = flaskY;
-            const innerFlaskWidth = FLASK_WIDTH - ctx.lineWidth * 2;
-            const innerFlaskHeight = FLASK_HEIGHT;
+            const innerBottleX = bottleX + ctx.lineWidth;
+            const innerBottleY = bottleY;
+            const innerBottleWidth = BOTTLE_WIDTH - ctx.lineWidth * 2;
+            const innerBottleHeight = BOTTLE_HEIGHT;
 
             for (let segIdx = 0; segIdx < 4; segIdx++) {
-                const colorHex = flask[segIdx];
+                const colorHex = bottle[segIdx];
                 if (colorHex) {
                     ctx.fillStyle = `#${colorHex}`;
-                    const segY = innerFlaskY + innerFlaskHeight - ((segIdx + 1) * SEGMENT_HEIGHT);
+                    const segY = innerBottleY + innerBottleHeight - ((segIdx + 1) * SEGMENT_HEIGHT);
                     
                     if(segIdx === 0) {
                         ctx.beginPath();
-                        ctx.moveTo(innerFlaskX, segY);
-                        ctx.lineTo(innerFlaskX + innerFlaskWidth, segY);
-                        ctx.lineTo(innerFlaskX + innerFlaskWidth, innerFlaskY + innerFlaskHeight - radius);
-                        ctx.quadraticCurveTo(innerFlaskX + innerFlaskWidth, innerFlaskY + innerFlaskHeight, innerFlaskX + innerFlaskWidth - radius, innerFlaskY + innerFlaskHeight);
-                        ctx.lineTo(innerFlaskX + radius, innerFlaskY + innerFlaskHeight);
-                        ctx.quadraticCurveTo(innerFlaskX, innerFlaskY + innerFlaskHeight, innerFlaskX, innerFlaskY + innerFlaskHeight - radius);
+                        ctx.moveTo(innerBottleX, segY);
+                        ctx.lineTo(innerBottleX + innerBottleWidth, segY);
+                        ctx.lineTo(innerBottleX + innerBottleWidth, innerBottleY + innerBottleHeight - radius);
+                        ctx.quadraticCurveTo(innerBottleX + innerBottleWidth, innerBottleY + innerBottleHeight, innerBottleX + innerBottleWidth - radius, innerBottleY + innerBottleHeight);
+                        ctx.lineTo(innerBottleX + radius, innerBottleY + innerBottleHeight);
+                        ctx.quadraticCurveTo(innerBottleX, innerBottleY + innerBottleHeight, innerBottleX, innerBottleY + innerBottleHeight - radius);
                         ctx.closePath();
                         ctx.fill();
                     } else {
-                        ctx.fillRect(innerFlaskX, segY, innerFlaskWidth, SEGMENT_HEIGHT);
+                        ctx.fillRect(innerBottleX, segY, innerBottleWidth, SEGMENT_HEIGHT);
                     }
 
                     if(segIdx < 3) {
                         ctx.strokeStyle = 'rgba(255,255,255,0.08)';
                         ctx.lineWidth = 1 * UNIT;
                         ctx.beginPath();
-                        ctx.moveTo(innerFlaskX + 3, segY);
-                        ctx.lineTo(innerFlaskX + innerFlaskWidth - 3, segY);
+                        ctx.moveTo(innerBottleX + 3, segY);
+                        ctx.lineTo(innerBottleX + innerBottleWidth - 3, segY);
                         ctx.stroke();
                     }
                 }
@@ -1318,25 +1333,25 @@ function drawVisualSolutionImage(path, inferredBoardState) {
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#fff';
                 
-                if (flaskIdx === currentMove.from - 1) {
-                    ctx.fillText('👆', flaskX + FLASK_WIDTH / 2, fingerIconY + 6 * UNIT);
-                } else if (flaskIdx === currentMove.to - 1) {
-                    ctx.fillText('👇', flaskX + FLASK_WIDTH / 2, fingerIconY + 6 * UNIT);
+                if (bottleIdx === currentMove.from - 1) {
+                    ctx.fillText('👆', bottleX + BOTTLE_WIDTH / 2, fingerIconY + 6 * UNIT);
+                } else if (bottleIdx === currentMove.to - 1) {
+                    ctx.fillText('👇', bottleX + BOTTLE_WIDTH / 2, fingerIconY + 6 * UNIT);
                 }
             }
 
-            if (flask.length === 4 && flask.every(c => c === flask[0])) {
+            if (bottle.length === 4 && bottle.every(c => c === bottle[0])) {
                 ctx.font = `${22 * UNIT}px "Segoe UI", Arial`;
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#fff';
-                ctx.fillText('👑', flaskX + FLASK_WIDTH / 2, flaskY - 24 * UNIT);
+                ctx.fillText('👑', bottleX + BOTTLE_WIDTH / 2, bottleY - 24 * UNIT);
             }
 
             ctx.fillStyle = '#fff';
             ctx.font = `800 ${15 * UNIT}px "Segoe UI", Arial`; 
             ctx.textAlign = 'center';
-            const textY = flaskY + FLASK_HEIGHT + 6 * UNIT;
-            ctx.fillText(flaskIdx + 1, flaskX + FLASK_WIDTH / 2, textY);
+            const textY = bottleY + BOTTLE_HEIGHT + 6 * UNIT;
+            ctx.fillText(bottleIdx + 1, bottleX + BOTTLE_WIDTH / 2, textY);
         }
     });
 }
