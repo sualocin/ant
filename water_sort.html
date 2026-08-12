@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="page-title">개미군단 - 과일주스 V12</title>
 <style>
 /* === 기존 다크 테마 CSS 스펙 통합 === */
@@ -26,16 +26,16 @@ button,input{font:inherit}
   border-bottom:1px solid #214233;backdrop-filter:blur(14px);
 }
 .site-nav-inner{
-  width:min(1200px,100%);margin:auto;min-height:58px;padding:8px 18px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  width:min(1200px,100%);margin:auto;min-height:58px;padding:8px 12px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
 }
-.site-nav-brand-link{display:flex;align-items:center;gap:9px;color:var(--accent);text-decoration:none}
-.site-nav-title{font-size:18px;font-weight:700;letter-spacing:.04em;color:#f3ca65}
-.site-nav-subtitle{font-size:10px;color:var(--muted);display:block;line-height:1}
-.site-nav-links{display:flex;align-items:center;gap:6px}
+.site-nav-brand-link{display:flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;flex-shrink:0}
+.site-nav-title{font-size:15px;font-weight:700;letter-spacing:.02em;color:#f3ca65;white-space:nowrap}
+.site-nav-subtitle{font-size:9px;color:var(--muted);display:block;line-height:1}
+.site-nav-links{display:flex;align-items:center;gap:4px;flex-wrap:nowrap}
 .site-nav-link{
   color:#d0e3d7;text-decoration:none;border:0;background:transparent;
-  padding:8px 11px;border-radius:8px;cursor:pointer;font-size:14px;
+  padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap;
 }
 .site-nav-link:hover{background:#ffffff0f}
 .site-nav-link.active{color:var(--accent);background:#ffffff0a}
@@ -305,8 +305,8 @@ button,input{font:inherit}
 
 .lang-switch {
   background: #12261e; color: var(--accent); border: 1px solid #214032;
-  padding: 6px 12px; font-size: 13px; border-radius: 8px; cursor: pointer;
-  font-weight: 700; transition: all 0.15s ease;
+  padding: 5px 8px; font-size: 11px; border-radius: 8px; cursor: pointer;
+  font-weight: 700; transition: all 0.15s ease; white-space: nowrap;
 }
 .lang-switch:hover { background: #1d3d2e; }
 
@@ -408,8 +408,8 @@ let currentLang = 'ko';
 const translations = {
   ko: {
     pageTitle: "개미군단 - 과일주스 V12",
-    navTitle: "개미군단 과일주스",
-    navNemo: "개미족의 지혜 네모",
+    navTitle: "과일주스",
+    navNemo: "네모",
     navReset: "초기화",
     uploadBtn: "📷 게임 스크린샷 선택하여 자동 인식",
     uploadDesc: "스크린샷을 선택하면 빈병 수와 색상('?' 포함)을 자동으로 추출합니다. <br>",
@@ -442,8 +442,8 @@ const translations = {
   },
   en: {
     pageTitle: "Ant Army - Fruit Juice V12",
-    navTitle: "Ant Army Fruit Juice",
-    navNemo: "Ant Tribe Wisdom Nemo",
+    navTitle: "Fruit Juice",
+    navNemo: "Nemo",
     navReset: "Reset",
     uploadBtn: "📷 Select Game Screenshot for Auto-Detection",
     uploadDesc: "Select a screenshot to automatically extract the number of flasks and colors (including '?').<br>",

@@ -22,16 +22,16 @@ button,input{font:inherit}
   border-bottom:1px solid #214233;backdrop-filter:blur(14px);
 }
 .site-nav-inner{
-  width:min(1200px,100%);margin:auto;min-height:58px;padding:8px 18px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  width:min(1200px,100%);margin:auto;min-height:58px;padding:8px 12px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
 }
-.site-nav-brand-link{display:flex;align-items:center;gap:9px;color:var(--accent);text-decoration:none}
-.site-nav-title{font-size:18px;font-weight:700;letter-spacing:.04em;color:#f3ca65}
-.site-nav-subtitle{font-size:10px;color:var(--muted);display:block;line-height:1}
-.site-nav-links{display:flex;align-items:center;gap:6px}
+.site-nav-brand-link{display:flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;flex-shrink:0}
+.site-nav-title{font-size:15px;font-weight:700;letter-spacing:.02em;color:#f3ca65;white-space:nowrap}
+.site-nav-subtitle{font-size:9px;color:var(--muted);display:block;line-height:1}
+.site-nav-links{display:flex;align-items:center;gap:4px;flex-wrap:nowrap}
 .site-nav-link,.site-nav-dropdown-toggle{
   color:#d0e3d7;text-decoration:none;border:0;background:transparent;
-  padding:8px 11px;border-radius:8px;cursor:pointer;font-size:14px;
+  padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap;
 }
 .site-nav-link:hover,.site-nav-dropdown-toggle:hover{background:#ffffff0f}
 .site-nav-link.active{color:var(--accent);background:#ffffff0a}
@@ -191,8 +191,8 @@ table.pieces-on-deck td{
 
 .lang-switch {
   background: #12261e; color: var(--accent); border: 1px solid #214032;
-  padding: 6px 12px; font-size: 13px; border-radius: 8px; cursor: pointer;
-  font-weight: 700; transition: all 0.15s ease;
+  padding: 5px 8px; font-size: 11px; border-radius: 8px; cursor: pointer;
+  font-weight: 700; transition: all 0.15s ease; white-space: nowrap;
 }
 .lang-switch:hover { background: #1d3d2e; }
 
@@ -285,10 +285,10 @@ const translations = {
   ko: {
     pageTitle: "개미군단 - 개미족의 지혜 네모 솔버",
     navTitle: "개미족의 지혜 네모",
-    navFruit: "개미군단 과일주스",
+    navFruit: "과일주스",
     navReset: "초기화",
     uploadBtn: "📷 게임 스크린샷 선택하여 자동 인식",
-    uploadDesc: "스크린샷을 업로드하면 9×9 보드와 3개의 도형을 자동으로 판별하여 세팅합니다.<br>도형 인식을 잘못할 때가 있어요;;; 아직 테스트중이니 잘못되면 다시 그려주세욧!!",
+    uploadDesc: "스크린샷을 업로드하면 9×9 보드와 3개의 도형을 자동으로 판별하여 세팅합니다.<br>도형 인식을 잘못할 때가 있어요;;;",
     btnPlace: "배치",
     btnUndo: "다시보기",
     helpText: "보드와 3개의 도형을 입력(또는 자동 인식)한 뒤 <b>배치</b>를 누르면 추천 배치를 적용합니다.",
@@ -309,10 +309,10 @@ const translations = {
   en: {
     pageTitle: "Ant Army - Wisdom of the Ant Tribe Nemo Solver",
     navTitle: "Ant Tribe Wisdom Nemo",
-    navFruit: "Ant Army Fruit Juice",
+    navFruit: "Fruit Juice",
     navReset: "Reset",
     uploadBtn: "📷 Select Game Screenshot for Auto-Detection",
-    uploadDesc: "Uploading a screenshot will automatically detect the 9×9 board and 3 pieces.<br>Piece recognition can sometimes be imperfect since it's still testing!! Please redraw if needed!",
+    uploadDesc: "Uploading a screenshot will automatically detect the 9×9 board and 3 pieces.<br>Piece recognition can sometimes be imperfect since it's still testing!! <br>Please redraw if needed!",
     btnPlace: "Place",
     btnUndo: "Replay",
     helpText: "Input (or auto-detect) the board and 3 pieces, then click <b>Place</b> to apply the recommended placement.",
