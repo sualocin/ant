@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>개미군단 - 개미족의 지혜 네모 솔버</title>
+<title id="page-title">개미군단 - 개미족의 지혜 네모 솔버</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -85,11 +84,10 @@ button,input{font:inherit}
 }
 .upload-btn:hover { transform: scale(1.03); }
 
-#score{
-  text-align:center;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:700;margin-bottom:2px;
-  color:var(--accent);text-shadow:0 0 12px rgba(243,202,101,0.4);
+#message-display{
+  text-align:center;font-size:clamp(0.95rem,3.2vw,1.2rem);font-weight:700;margin-bottom:2px;min-height:2rem;
+  color:var(--accent);text-shadow:0 0 10px rgba(243,202,101,0.4);display:flex;align-items:center;justify-content:center;
 }
-#score::before{content:"포인트: ";font-size:0.7em;color:#b8a374;font-weight:500;}
 #game-table-container{width:100%;display:flex;flex-direction:column;gap:12px}
 #game-board{
   border-collapse:collapse;table-layout:fixed;background:#0a1711;
@@ -191,6 +189,13 @@ table.pieces-on-deck td{
 .help{margin-top:10px;color:#708d7e;font-size:12px;text-align:center;}
 .result{margin-top:9px;text-align:center;color:#f3ca65;font-size:13px;min-height:18px;font-weight:500;}
 
+.lang-switch {
+  background: #12261e; color: var(--accent); border: 1px solid #214032;
+  padding: 6px 12px; font-size: 13px; border-radius: 8px; cursor: pointer;
+  font-weight: 700; transition: all 0.15s ease;
+}
+.lang-switch:hover { background: #1d3d2e; }
+
 @media(max-width:768px){
   .container{padding:10px 7px 20px}
   .card{padding:10px;border-radius:14px}
@@ -207,13 +212,14 @@ table.pieces-on-deck td{
   <div class="site-nav-inner">
     <a href="https://sualocin.github.io/ant/" class="site-nav-brand-link">
       <span>
-        <span class="site-nav-title">개미족의 지혜 네모</span>
+        <span class="site-nav-title" data-i18n="navTitle">개미족의 지혜 네모</span>
         <span class="site-nav-subtitle">S454 마요 ₍ᵔ.ˬ.ᵔ₎</span>
       </span>
     </a>
     <div class="site-nav-links">
-      <a href="https://sualocin.github.io/ant/water_sort.html" class="site-nav-link">개미군단 과일주스</a>
-      <a href="#" class="site-nav-link" onclick="resetAll(); return false;">초기화</a>
+      <a href="https://sualocin.github.io/ant/water_sort.html" class="site-nav-link" data-i18n="navFruit">개미군단 과일주스</a>
+      <a href="#" class="site-nav-link" onclick="resetAll(); return false;" data-i18n="navReset">초기화</a>
+      <button type="button" class="lang-switch" onclick="toggleLanguage()">🇰🇷 / 🇺🇸</button>
     </div>
   </div>
 </nav>
@@ -231,17 +237,17 @@ table.pieces-on-deck td{
 
         <!-- 이미지 자동 인식 업로드 카드 -->
         <div class="upload-card-section">
-          <label class="upload-btn">
+          <label class="upload-btn" data-i18n="uploadBtn">
             📷 게임 스크린샷 선택하여 자동 인식
             <input type="file" id="image-input" accept="image/*" onchange="processUploadedNemoImage(event)" style="display:none;">
           </label>
-          <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+          <div style="font-size: 11px; color: var(--muted); margin-top: 6px;" data-i18n="uploadDesc">
             스크린샷을 업로드하면 9×9 보드와 3개의 도형을 자동으로 판별하여 세팅합니다.<br>
-			도형 인식을 잘못할 때가 있어요;;; 아직 테스트중이니 잘못되면 다시 그려주세욧!!
+            도형 인식을 잘못할 때가 있어요;;; 아직 테스트중이니 잘못되면 다시 그려주세욧!!
           </div>
         </div>
 
-        <div id="score">0</div>
+        <div id="message-display"></div>
         <div id="game-table-container">
           <table id="game-board" title="게임판">
             <tbody id="board-body"></tbody>
@@ -255,8 +261,8 @@ table.pieces-on-deck td{
         </div>
 
         <div id="pause-button-container">
-          <button id="pause-button">배치</button>
-          <button id="undo-button">다시보기</button>
+          <button id="pause-button" data-i18n="btnPlace">배치</button>
+          <button id="undo-button" data-i18n="btnUndo">다시보기</button>
         </div>
 
         <div class="footer">
@@ -265,7 +271,7 @@ table.pieces-on-deck td{
             <input title="표시 속도" name="speed" type="range" id="speed" min="1" max="10" value="1">
           </div>
         </div>
-        <div class="help">보드와 3개의 도형을 입력(또는 자동 인식)한 뒤 <b>배치</b>를 누르면 추천 배치를 적용합니다.</div>
+        <div class="help" data-i18n="helpText">보드와 3개의 도형을 입력(또는 자동 인식)한 뒤 <b>배치</b>를 누르면 추천 배치를 적용합니다.</div>
         <div id="result" class="result"></div>
       </div>
     </div>
@@ -273,6 +279,79 @@ table.pieces-on-deck td{
 </div>
 
 <script>
+let currentLang = 'ko';
+
+const translations = {
+  ko: {
+    pageTitle: "개미군단 - 개미족의 지혜 네모 솔버",
+    navTitle: "개미족의 지혜 네모",
+    navFruit: "개미군단 과일주스",
+    navReset: "초기화",
+    uploadBtn: "📷 게임 스크린샷 선택하여 자동 인식",
+    uploadDesc: "스크린샷을 업로드하면 9×9 보드와 3개의 도형을 자동으로 판별하여 세팅합니다.<br>도형 인식을 잘못할 때가 있어요;;; 아직 테스트중이니 잘못되면 다시 그려주세욧!!",
+    btnPlace: "배치",
+    btnUndo: "다시보기",
+    helpText: "보드와 3개의 도형을 입력(또는 자동 인식)한 뒤 <b>배치</b>를 누르면 추천 배치를 적용합니다.",
+    speedTitle: "표시 속도",
+    boardTitle: "게임판",
+    deckTitle: "5×5 입력판",
+    errNoPiece: "도형을 하나 이상 입력해주세요.",
+    gameOverMsg: "더 이상 도형을 옮길 수 없습니다! (게임 오버)",
+    completeMsg: (count) => `배치 완료 · ${count}개 도형 배치 완료`,
+    stepMsg: (i) => `${i+1}번째 배치 진행 중...`,
+    calcMsg: "계산 중... 잠시 후 배치가 시작됩니다.",
+    calcErr: "계산 중 오류가 발생했습니다. 개발자 도구를 확인해 주세요.",
+    noUndo: "취소할 배치 기록이 없습니다.",
+    undoDone: "방금 실행한 배치를 취소하고 이전 상태로 복원했습니다.",
+    resetDone: "초기화했습니다.",
+    analysisDone: "✨ 이미지 분석 완료! 보드와 3개 도형이 완벽하게 세팅되었습니다."
+  },
+  en: {
+    pageTitle: "Ant Army - Wisdom of the Ant Tribe Nemo Solver",
+    navTitle: "Ant Tribe Wisdom Nemo",
+    navFruit: "Ant Army Fruit Juice",
+    navReset: "Reset",
+    uploadBtn: "📷 Select Game Screenshot for Auto-Detection",
+    uploadDesc: "Uploading a screenshot will automatically detect the 9×9 board and 3 pieces.<br>Piece recognition can sometimes be imperfect since it's still testing!! Please redraw if needed!",
+    btnPlace: "Place",
+    btnUndo: "Replay",
+    helpText: "Input (or auto-detect) the board and 3 pieces, then click <b>Place</b> to apply the recommended placement.",
+    speedTitle: "Playback Speed",
+    boardTitle: "Game Board",
+    deckTitle: "5×5 Input Deck",
+    errNoPiece: "Please enter at least one piece.",
+    gameOverMsg: "No more moves available! (Game Over)",
+    completeMsg: (count) => `Placement Complete · Placed ${count} pieces`,
+    stepMsg: (i) => `Placing piece ${i+1}...`,
+    calcMsg: "Calculating... Placements will begin shortly.",
+    calcErr: "An error occurred during calculation. Please check the developer console.",
+    noUndo: "No placement history to undo.",
+    undoDone: "Undid the last placement and restored the previous state.",
+    resetDone: "Reset successfully.",
+    analysisDone: "✨ Image analysis complete! Board and 3 pieces are fully set up."
+  }
+};
+
+function toggleLanguage() {
+  currentLang = currentLang === 'ko' ? 'en' : 'ko';
+  document.documentElement.lang = currentLang;
+  updateTexts();
+}
+
+function updateTexts() {
+  const t = translations[currentLang];
+  document.getElementById('page-title').textContent = t.pageTitle;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) {
+      el.innerHTML = t[key];
+    }
+  });
+  document.getElementById('game-board').title = t.boardTitle;
+  document.getElementById('pieces-on-deck-container').title = t.deckTitle;
+  speedEl.title = t.speedTitle;
+}
+
 function setScale(scale, btn) {
   const wrapper = document.getElementById("zoom-wrapper");
   wrapper.style.transform = `scale(${scale})`;
@@ -548,7 +627,7 @@ let lastState = null;
 
 const boardBody = document.getElementById("board-body");
 const pieceTables = [0,1,2].map(i => document.querySelector("#piece-on-deck-"+i+" tbody"));
-const scoreEl = document.getElementById("score");
+const msgDisplay = document.getElementById("message-display");
 const resultEl = document.getElementById("result");
 const drawBtn = document.getElementById("pause-button");
 const undoBtn = document.getElementById("undo-button");
@@ -596,7 +675,6 @@ function renderBoard() {
       td.classList.add("color-" + val);
     }
   });
-  scoreEl.textContent = currentScore;
 }
 
 function renderPieces() {
@@ -637,7 +715,7 @@ function paintTarget(target) {
     if(key===lastCellKey)return;
     lastCellKey=key;
     board[r][c]=paintValue ? true : null;
-    renderBoard(); resultEl.textContent="";
+    renderBoard(); resultEl.textContent=""; msgDisplay.textContent="";
   } else if(pointerMode==="piece"){
     const td=target.closest("table.pieces-on-deck td");
     if(!td)return;
@@ -645,7 +723,7 @@ function paintTarget(target) {
     if(pi!==activePiece || key===lastCellKey)return;
     lastCellKey=key;
     pieces[pi][r][c]=paintValue;
-    renderPieces(); resultEl.textContent="";
+    renderPieces(); resultEl.textContent=""; msgDisplay.textContent="";
   }
 }
 
@@ -660,7 +738,7 @@ document.addEventListener("pointerdown",e=>{
     paintValue=!board[r][c];
     board[r][c]=paintValue ? true : null;
     lastCellKey=r+","+c;
-    renderBoard(); resultEl.textContent="";
+    renderBoard(); resultEl.textContent=""; msgDisplay.textContent="";
   } else if(pieceCell){
     e.preventDefault();
     convertBoardToDefaultColor();
@@ -669,7 +747,7 @@ document.addEventListener("pointerdown",e=>{
     paintValue=!pieces[pi][r][c];
     pieces[pi][r][c]=paintValue;
     lastCellKey=pi+":"+r+","+c;
-    renderPieces(); resultEl.textContent="";
+    renderPieces(); resultEl.textContent=""; msgDisplay.textContent="";
   }
 });
 document.addEventListener("pointermove",e=>{
@@ -712,7 +790,7 @@ function runOriginalAI() {
   const filledCount = pieceSet.filter(p => !blokie.isEmpty(p)).length;
 
   if (filledCount === 0) {
-    resultEl.textContent = "도형을 하나 이상 입력해주세요.";
+    resultEl.textContent = translations[currentLang].errNoPiece;
     return null;
   }
 
@@ -731,6 +809,7 @@ function runOriginalAI() {
 
 function showOriginalSolution(aiResult) {
   if(previewTimer) clearTimeout(previewTimer);
+  msgDisplay.textContent = "";
 
   if(!aiResult || !aiResult.result) {
     clearingCells=[];
@@ -752,7 +831,7 @@ function showOriginalSolution(aiResult) {
   if(steps.length === 0) {
     clearingCells=[];
     renderBoard();
-    resultEl.textContent="현재 보드에서는 배치 가능한 위치를 찾지 못했습니다.";
+    msgDisplay.textContent = translations[currentLang].gameOverMsg;
     drawBtn.classList.remove("active");
     return;
   }
@@ -766,7 +845,7 @@ function showOriginalSolution(aiResult) {
       clearingCells=[];
       renderBoard();
       renderPieces();
-      resultEl.textContent=`배치 완료 · ${steps.length}개 도형 배치 완료`;
+      resultEl.textContent = translations[currentLang].completeMsg(steps.length);
       drawBtn.classList.remove("active");
       return;
     }
@@ -791,7 +870,7 @@ function showOriginalSolution(aiResult) {
       renderPieces();
     }
 
-    resultEl.textContent=`${i+1}번째 배치 진행 중...`;
+    resultEl.textContent = translations[currentLang].stepMsg(i);
 
     const clearDelay = clearingCells.length > 0 ? 500 : 0;
 
@@ -828,7 +907,8 @@ drawBtn.addEventListener("click",e=>{
   e.preventDefault();
   saveCurrentState();
 
-  resultEl.textContent="계산 중... 잠시 후 배치가 시작됩니다.";
+  resultEl.textContent = translations[currentLang].calcMsg;
+  msgDisplay.textContent = "";
   try {
     pieceSetForDisplay=pieces.map(pieceToBitboard);
     const result=runOriginalAI();
@@ -837,20 +917,21 @@ drawBtn.addEventListener("click",e=>{
     console.error(err);
     if(previewTimer)clearTimeout(previewTimer);
     drawBtn.classList.remove("active");
-    resultEl.textContent="계산 중 오류가 발생했습니다. 개발자 도구를 확인해 주세요.";
+    resultEl.textContent = translations[currentLang].calcErr;
   }
 });
 
 undoBtn.addEventListener("click", e => {
   e.preventDefault();
   if (!lastState) {
-    resultEl.textContent = "취소할 배치 기록이 없습니다.";
+    resultEl.textContent = translations[currentLang].noUndo;
     return;
   }
 
   if (previewTimer) clearTimeout(previewTimer);
   clearingCells = [];
   drawBtn.classList.remove("active");
+  msgDisplay.textContent = "";
 
   board = lastState.board.map(row => [...row]);
   pieces = lastState.pieces.map(p => p.map(row => [...row]));
@@ -859,29 +940,20 @@ undoBtn.addEventListener("click", e => {
   renderBoard();
   renderPieces();
 
-  resultEl.textContent = "방금 실행한 배치를 취소하고 이전 상태로 복원했습니다.";
+  resultEl.textContent = translations[currentLang].undoDone;
 });
 
 function resetAll(){
   if(previewTimer)clearTimeout(previewTimer);
   for(let r=0;r<N;r++)for(let c=0;c<N;c++)board[r][c]=null;
   for(let p=0;p<3;p++)for(let r=0;r<P;r++)for(let c=0;c<P;c++)pieces[p][r][c]=false;
-  clearingCells=[]; currentScore=0; scoreEl.textContent="0"; lastState=null;
+  clearingCells=[]; currentScore=0; lastState=null;
   renderBoard(); renderPieces();
-  resultEl.textContent="초기화했습니다.";
+  resultEl.textContent = translations[currentLang].resetDone;
+  msgDisplay.textContent = "";
   drawBtn.classList.remove("active");
 }
 
-/* === 9x9 보드 스캔 + "덩어리(연결요소) 탐지 → 상대 격자 환산" 방식의 하단 도형 인식 엔진 ===
-   기존 방식은 5x5 입력판 박스의 위치/크기를 이미지 전체 대비 고정 비율(%)로 가정하고 그 안에서
-   5x5로 균등 분할한 좌표를 샘플링했다. 하지만 실제 게임 화면에서는 도형이 그 고정 박스 안에
-   딱 맞춰 그려지지 않고, 조각 모양에 따라 다른 위치/크기로 그려지기 때문에 좌표가 어긋나 인식이
-   잘 안 되는 문제가 있었다.
-
-   새 방식은 보드 아래 영역에서 "색이 있는 덩어리(블록 하나하나)"를 직접 찾아내고, 그 덩어리들의
-   좌표 간격(칸 간격)을 서로 비교해서 몇 행 몇 열에 해당하는지 역산한다. 고정 박스 좌표에 의존하지
-   않으므로 스크린샷 해상도가 달라져도 안정적으로 동작한다.
-*/
 function processUploadedNemoImage(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -896,14 +968,12 @@ function processUploadedNemoImage(event) {
 
     const w = img.width;
     const h = img.height;
-    // 이미지 전체를 한 번만 읽어와서 재사용 (getImageData 반복 호출보다 훨씬 빠르고 안전함)
     const fullData = ctx.getImageData(0, 0, w, h).data;
     function pxAt(x, y) {
       const i = (y * w + x) * 4;
       return [fullData[i], fullData[i + 1], fullData[i + 2]];
     }
 
-    // 1. 9x9 메인 보드 스캔 (기존 로직/좌표 그대로 유지 — 이 부분은 이미 잘 동작함)
     const boardLeftPct = 0.038;
     const boardTopPct = 0.218;
     const boardWidthPct = 0.924;
@@ -946,20 +1016,14 @@ function processUploadedNemoImage(event) {
       }
     }
 
-    // 2. 하단 3개 도형 스캔 — 덩어리 탐지 방식
     let newPieces = Array.from({length:3}, () => Array.from({length:P}, () => Array(P).fill(false)));
 
-    // 보드 바로 아래 ~ 하단 버튼 위 사이를 도형 스캔 영역으로 설정.
-    // 이미지 전체 높이의 고정 비율이 아니라, "보드 셀 크기(cellW_px)" 기준 상대값을 사용해서
-    // 스크린샷의 해상도/비율이 달라져도 보드 크기에 맞춰 같이 스케일되도록 한다.
     const boardBottom_px = boardTop_px + 9 * cellW_px;
     const deckTop_px = Math.max(0, Math.round(boardBottom_px + 0.45 * cellW_px));
     const deckBottom_px = Math.min(h, Math.round(boardBottom_px + 5.2 * cellW_px));
     const regionW = w;
     const regionH = Math.max(0, deckBottom_px - deckTop_px);
 
-    // 채도(saturation)와 명도(value)로 "색이 있는 블록 픽셀"인지 판별.
-    // 배경은 어둡고(명도 낮음), 블록은 밝고 선명한 색을 띠기 때문에 명도 기준이 특히 잘 구분됨.
     function isBlockPixel(r, g, b) {
       const maxc = Math.max(r, g, b), minc = Math.min(r, g, b);
       const v = maxc / 255;
@@ -968,7 +1032,6 @@ function processUploadedNemoImage(event) {
     }
 
     if (regionH > 0) {
-      // 이진 마스크 생성
       const mask = new Uint8Array(regionW * regionH);
       for (let y = 0; y < regionH; y++) {
         const py = deckTop_px + y;
@@ -978,7 +1041,6 @@ function processUploadedNemoImage(event) {
         }
       }
 
-      // 8방향 연결요소(BFS)로 색이 있는 덩어리(블록 하나하나)를 찾는다
       const visited = new Uint8Array(regionW * regionH);
       const blobs = [];
       const stackX = [], stackY = [];
@@ -1011,13 +1073,12 @@ function processUploadedNemoImage(event) {
             }
           }
 
-          if (size >= 20) { // 너무 작은 잡음(노이즈)은 제외
+          if (size >= 20) {
             blobs.push({ minX, maxX, minY, maxY, w: maxX - minX + 1, h: maxY - minY + 1, size });
           }
         }
       }
 
-      // 대표 블록 크기(중앙값)에서 크게 벗어나는 덩어리는 잡음으로 보고 제외
       let cleanBlobs = blobs;
       if (blobs.length > 0) {
         const widths = blobs.map(b => b.w).sort((a, b) => a - b);
@@ -1030,7 +1091,6 @@ function processUploadedNemoImage(event) {
         );
       }
 
-      // 도형 3개가 가로로 나란히 배치되는 구조이므로, 가로 위치 기준 3등분하여 슬롯을 나눈다
       const slots = [[], [], []];
       cleanBlobs.forEach(b => {
         const cx = (b.minX + b.maxX) / 2;
@@ -1039,29 +1099,27 @@ function processUploadedNemoImage(event) {
         slots[idx].push(b);
       });
 
-      // 덩어리들의 좌표 차이로부터 "칸 간격(pitch)"을 역산
       function estimatePitch(startCoords, avgSize) {
         const uniq = [...new Set(startCoords.map(v => Math.round(v)))].sort((a, b) => a - b);
         let best = null;
         for (let i = 0; i < uniq.length; i++) {
           for (let j = i + 1; j < uniq.length; j++) {
             const diffVal = uniq[j] - uniq[i];
-            if (diffVal < avgSize * 0.6) continue; // 같은 칸으로 판단되는 미세한 차이는 무시
+            if (diffVal < avgSize * 0.6) continue;
             if (best === null || diffVal < best) best = diffVal;
           }
         }
         if (best !== null && best < avgSize * 3) return best;
-        return avgSize * 1.11; // 비교 대상이 없을 때 쓰는 경험적 보정값(블록 사이 여백 반영)
+        return avgSize * 1.11;
       }
 
       slots.forEach((slotBlobs, pIdx) => {
-        if (slotBlobs.length === 0) return; // 해당 슬롯은 빈 도형
+        if (slotBlobs.length === 0) return;
 
         const avgW = slotBlobs.reduce((s, b) => s + b.w, 0) / slotBlobs.length;
         const avgH = slotBlobs.reduce((s, b) => s + b.h, 0) / slotBlobs.length;
         const pitchX = estimatePitch(slotBlobs.map(b => b.minX), avgW);
         const pitchY = estimatePitch(slotBlobs.map(b => b.minY), avgH);
-        // 가장 왼쪽/위쪽 덩어리를 (row0, col0) 기준점으로 삼아 자동으로 좌상단 정렬됨
         const anchorCx = Math.min(...slotBlobs.map(b => b.minX)) + avgW / 2;
         const anchorCy = Math.min(...slotBlobs.map(b => b.minY)) + avgH / 2;
 
@@ -1082,13 +1140,14 @@ function processUploadedNemoImage(event) {
 
     renderBoard();
     renderPieces();
-    resultEl.textContent = "✨ 이미지 분석 완료! 보드와 3개 도형이 완벽하게 세팅되었습니다.";
+    resultEl.textContent = translations[currentLang].analysisDone;
+    msgDisplay.textContent = "";
   };
 
   img.src = URL.createObjectURL(file);
 }
 
-makeBoard(); makePieces(); renderBoard(); renderPieces();
+makeBoard(); makePieces(); renderBoard(); renderPieces(); updateTexts();
 </script>
 </body>
 </html>
