@@ -217,7 +217,7 @@ button,input{font:inherit}
   font-weight: bold; color: rgba(255,255,255,0.7);
 }
 
-/* 버튼 스타일 */
+/* 일반 버튼 스타일 (원래대로 복원) */
 .controls-row {
   display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;
 }
@@ -233,10 +233,26 @@ button,input{font:inherit}
   background: #152820; color: #4a6657; border-color: #1c3629; cursor: not-allowed;
   box-shadow: none; text-shadow: none; transform: none !important;
 }
+
 .btn-red { background: linear-gradient(180deg, #9e3939 0%, #612525 100%); border-color: #d47373; color: #ffdddd; }
 .btn-red:hover { background: linear-gradient(180deg, #b84747 0%, #7a2d2d 100%); }
+
 .btn-orange { background: linear-gradient(180deg, #b87a39 0%, #6b431e 100%); border-color: #d4a373; color: #ffebd0; }
 .btn-orange:hover { background: linear-gradient(180deg, #cc8b45 0%, #805124 100%); }
+
+/* '배치 정답 구하기' 버튼만 게임 스타일 및 강조 유지 */
+.btn-solve-highlight {
+  background: linear-gradient(to bottom, #fce074 0%, #e89823 50%, #c46a06 51%, #df8f15 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #ffe89e !important;
+  border-radius: 12px 0px 12px 0px !important;
+  font-size: 1.1rem !important;
+  padding: 0.7rem 1.5rem !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.6) !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6) !important;
+}
+.btn-solve-highlight:hover { filter: brightness(1.1); }
+.btn-solve-highlight:active { transform: scale(0.97); }
 
 .bottle-count-badge { font-size: 14px; color: var(--accent); font-weight: bold; margin: 0 5px; }
 
@@ -385,7 +401,8 @@ button,input{font:inherit}
         <button class="action-btn" onclick="addBottle()" data-i18n="btnAdd">+ 추가</button>
         <button class="action-btn btn-orange" id="btn-reset-selected" onclick="resetSelectedBottle()" disabled data-i18n="btnResetSelected">선택 병 비우기</button>
         <button class="action-btn btn-orange" onclick="resetAll()" data-i18n="btnResetAll">전체 초기화</button>
-        <button class="action-btn" onclick="solve()" id="solve-btn" style="background: linear-gradient(180deg, #d4a017 0%, #8a6400 100%); color: #fff; border-color: #f3ca65; font-size: 1.1rem; padding: 0.7rem 1.5rem;" data-i18n="btnSolve">배치 정답 구하기 🚀</button>
+        <!-- 배치 정답 구하기 버튼만 강조 스타일 유지 -->
+        <button class="action-btn btn-solve-highlight" onclick="solve()" id="solve-btn" data-i18n="btnSolve">배치 정답 구하기 🚀</button>
       </div>
 
       <!-- 정답 결과 컨테이너 -->
@@ -811,7 +828,7 @@ function processUploadedImage(event) {
   const img = new Image();
   img.onload = function() {
     const canvas = document.createElement('canvas');
-	const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     canvas.width = img.width;
     canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
