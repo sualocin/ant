@@ -878,82 +878,72 @@ function inferMissingColors(boardState) {
     const currentState = boardState.map(f => [...f]);
     const knownColorCounts = {};
     const questionMarkPositions = [];
-    const colorResiduals = {};
 
     currentState.forEach((bottle, bIdx) => {
         bottle.forEach((color, sIdx) => {
-            if (color === '?') {
-                questionMarkPositions.push({bIdx, sIdx});
-            } else {
-                knownColorCounts[color] = (knownColorCounts[color] || 0) + 1;
-            }
+            if (color === '?') questionMarkPositions.push({bIdx, sIdx});
+            else knownColorCounts[color] = (knownColorCounts[color] || 0) + 1;
         });
     });
-
     if (questionMarkPositions.length === 0) return currentState;
 
     const usedColors = [...new Set(currentState.flat().filter(c => c !== '?'))];
-    
+    const remaining = {};
     usedColors.forEach(color => {
-        const remaining = 4 - (knownColorCounts[color] || 0);
-        if (remaining > 0) {
-            colorResiduals[color] = remaining;
-        } else if (remaining < 0) {
-            throw new Error(`모순 발생: 색상 #${color}이(가) 이미 ${knownColorCounts[color]}칸 사용되었습니다.`);
-        }
+        const n = 4 - (knownColorCounts[color] || 0);
+        if (n > 0) remaining[color] = n;
+        else if (n < 0) throw new Error(`모순 발생: 색상 #${color}이(가) 이미 ${knownColorCounts[color]}칸 사용되었습니다.`);
     });
 
-    let totalResiduals = Object.values(colorResiduals).reduce((a,b) => a+b, 0);
-    if (totalResiduals !== questionMarkPositions.length) {
-        throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${totalResiduals})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
+    const total = Object.values(remaining).reduce((a,b) => a+b, 0);
+    if (total !== questionMarkPositions.length) {
+        throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${total})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
     }
 
-    const sortedRemainingColors = Object.entries(colorResiduals).sort((a, b) => a[1] - b[1]);
-    const resolvedState = currentState.map(f => [...f]);
-    const resolvedPositions = new Set();
+    function shuffle(a) {
+        a = a.slice();
+        for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+        return a;
+    }
 
-    sortedRemainingColors.forEach(([color, amount]) => {
-        for(let c = 0; c < amount; c++) {
-            let bestPosIdx = -1;
-            let bestScore = -100;
+    function canPlace(pos, color) {
+        const bottle = currentState[pos.bIdx];
+        if (pos.sIdx > 0 && bottle[pos.sIdx-1] === color) return false;
+        if (pos.sIdx + 1 < bottle.length && bottle[pos.sIdx+1] === color) return false;
+        return true;
+    }
 
-            questionMarkPositions.forEach((pos, idx) => {
-                if (resolvedPositions.has(idx)) return;
-
-                let score = 0;
-                if (pos.sIdx > 0) {
-                    const colorBelow = resolvedState[pos.bIdx][pos.sIdx - 1];
-                    if (colorBelow === color) {
-                        score -= 100; 
-                    } else if (colorBelow !== '?' && colorBelow !== color) {
-                        score -= 10;
-                    }
-                } else {
-                    score += 5;
-                }
-                
-                if (pos.sIdx < 3) {
-                    const colorAbove = currentState[pos.bIdx][pos.sIdx + 1];
-                    if (colorAbove !== '?' && colorAbove !== color) score -= 40;
-                }
-
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestPosIdx = idx;
-                }
-            });
-
-            if (bestPosIdx !== -1) {
-                const pos = questionMarkPositions[bestPosIdx];
-                resolvedState[pos.bIdx][pos.sIdx] = color;
-                resolvedPositions.add(bestPosIdx);
-            } else {
-                throw new Error(`모순 발생: 색상 #${color}을(를) 할당할 물음표 칸을 찾을 수 없습니다.`);
-            }
+    function choosePosition(unresolved) {
+        let best = null, bestCandidates = null;
+        for (const pos of unresolved) {
+            const candidates = shuffle(Object.keys(remaining)).filter(c => remaining[c] > 0 && canPlace(pos,c));
+            if (!candidates.length) return {pos, candidates: []};
+            if (!best || candidates.length < bestCandidates.length) { best=pos; bestCandidates=candidates; }
         }
-    });
+        return {pos:best, candidates:bestCandidates || []};
+    }
 
-    return resolvedState;
+    function backtrack(unresolved) {
+        if (!unresolved.length) return true;
+        const choice = choosePosition(unresolved);
+        if (!choice.pos || !choice.candidates.length) return false;
+        for (const color of shuffle(choice.candidates)) {
+            const pos = choice.pos;
+            if (!remaining[color] || !canPlace(pos,color)) continue;
+            currentState[pos.bIdx][pos.sIdx] = color;
+            remaining[color]--;
+            const next = unresolved.filter(p => p.bIdx !== pos.bIdx || p.sIdx !== pos.sIdx);
+            if (backtrack(next)) return true;
+            remaining[color]++;
+            currentState[pos.bIdx][pos.sIdx] = '?';
+        }
+        return false;
+    }
+
+    if (!backtrack(questionMarkPositions)) {
+        throw new Error('모순 발생: 물음표에 색상을 배정하면서 같은 색이 연속되지 않도록 하는 조합을 찾을 수 없습니다.');
+    }
+    return currentState;
 }
 
 function solve() {
