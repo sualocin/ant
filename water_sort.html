@@ -397,7 +397,7 @@ button,input{font:inherit}
       <!-- 컨트롤 버튼 -->
       <div class="controls-row">
         <button class="action-btn btn-red" onclick="removeBottle()" data-i18n="btnRemove">- 삭제</button>
-        <span class="bottle-count-badge" id="bottle-count-display">Clear Bottle: 6개</span>
+        <span class="bottle-count-badge" id="bottle-count-display">Bottle: 6개</span>
         <button class="action-btn" onclick="addBottle()" data-i18n="btnAdd">+ 추가</button>
         <button class="action-btn btn-orange" id="btn-reset-selected" onclick="resetSelectedBottle()" disabled data-i18n="btnResetSelected">선택 병 비우기</button>
         <button class="action-btn btn-orange" onclick="resetAll()" data-i18n="btnResetAll">전체 초기화</button>
@@ -447,7 +447,7 @@ const translations = {
     btnSolve: "배치 정답 구하기 🚀",
     tabImage: "🎨 이미지 답",
     tabText: "📄 텍스트 답",
-    bottleCountText: (count) => `Clear Bottle: ${count}개`,
+    bottleCountText: (count) => `Bottle: ${count}개`,
     eraserTitle: "선택된 병의 맨 위 칸 지우기",
     unknownTitle: "모르는 색상 (물음표) 입력",
     customPlaceholder: "HEX 코드",
