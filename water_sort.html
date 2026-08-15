@@ -535,6 +535,60 @@ let selectedPaletteHex = null;
 let bottleCount = 6;
 let bottlesData = [];
 
+// 같은 브라우저에서 페이지를 닫았다 다시 열어도 퍼즐 진행상태를 이어갑니다.
+const PUZZLE_STORAGE_KEY = 'watersort_puzzle_state_v1';
+
+function savePuzzleState() {
+  try {
+    localStorage.setItem(PUZZLE_STORAGE_KEY, JSON.stringify({
+      bottleCount,
+      bottlesData,
+      selectedBottleIndex,
+      selectedPaletteHex
+    }));
+  } catch (e) {
+    console.warn('퍼즐 상태 저장 실패:', e);
+  }
+}
+
+function loadPuzzleState() {
+  try {
+    const saved = localStorage.getItem(PUZZLE_STORAGE_KEY);
+    if (!saved) return false;
+
+    const parsed = JSON.parse(saved);
+    if (!parsed || !Array.isArray(parsed.bottlesData)) return false;
+
+    const count = Number(parsed.bottleCount);
+    if (!Number.isInteger(count) || count < 4 || count > 40) return false;
+
+    bottleCount = count;
+    bottlesData = Array.from({ length: bottleCount }, (_, i) => {
+      const bottle = parsed.bottlesData[i];
+      return Array.isArray(bottle) ? bottle.slice(0, 4) : [];
+    });
+
+    selectedBottleIndex =
+      Number.isInteger(parsed.selectedBottleIndex) &&
+      parsed.selectedBottleIndex >= 0 &&
+      parsed.selectedBottleIndex < bottleCount
+        ? parsed.selectedBottleIndex
+        : null;
+
+    selectedPaletteHex =
+      parsed.selectedPaletteHex === '?' ||
+      parsed.selectedPaletteHex === null ||
+      (typeof parsed.selectedPaletteHex === 'string' && colors.includes(parsed.selectedPaletteHex))
+        ? parsed.selectedPaletteHex
+        : null;
+
+    return true;
+  } catch (e) {
+    console.warn('저장된 퍼즐 상태를 불러오는 데 실패했습니다:', e);
+    return false;
+  }
+}
+
 function loadSavedColors() {
   const saved = localStorage.getItem('watersort_custom_colors');
   if (saved) {
@@ -564,7 +618,17 @@ function setScale(scale, btn) {
 
 function init() {
   loadSavedColors();
-  bottlesData = Array.from({ length: bottleCount }, () => []);
+
+  // 저장된 퍼즐이 있으면 그대로 이어서 하고,
+  // 없을 때만 기본 6병 상태로 시작합니다.
+  const restored = loadPuzzleState();
+  if (!restored) {
+    bottleCount = 6;
+    bottlesData = Array.from({ length: bottleCount }, () => []);
+    selectedBottleIndex = null;
+    selectedPaletteHex = null;
+  }
+
   renderPalette();
   renderBottles();
   updateInstructionText();
@@ -699,6 +763,7 @@ function selectTargetBottle(bottleIdx) {
   selectedBottleIndex = (selectedBottleIndex === bottleIdx) ? null : bottleIdx;
   renderBottles(); 
   updateInstructionText();
+  savePuzzleState();
 }
 
 function handleColorInput(hex) {
@@ -706,6 +771,7 @@ function handleColorInput(hex) {
   renderPalette();
 
   if (selectedBottleIndex === null) {
+    savePuzzleState();
     return;
   }
 
@@ -718,6 +784,7 @@ function handleColorInput(hex) {
   }
   renderBottles(); 
   renderPalette();
+  savePuzzleState();
 }
 
 function addBottle() {
@@ -727,6 +794,7 @@ function addBottle() {
     selectedBottleIndex = bottlesData.length - 1;
     renderBottles();
     updateInstructionText();
+    savePuzzleState();
   }
 }
 
@@ -738,6 +806,7 @@ function removeBottle() {
     renderBottles();
     renderPalette();
     updateInstructionText();
+    savePuzzleState();
   }
 }
 
@@ -746,6 +815,7 @@ function resetSelectedBottle() {
     bottlesData[selectedBottleIndex] = [];
     renderBottles();
     renderPalette();
+    savePuzzleState();
   }
 }
 
@@ -755,6 +825,14 @@ function resetAll() {
   selectedBottleIndex = null;
   selectedPaletteHex = null;
   document.getElementById('solution-container').style.display = 'none';
+
+  // 사용자가 '전체 초기화'를 눌렀을 때만 저장된 진행상태를 삭제합니다.
+  try {
+    localStorage.removeItem(PUZZLE_STORAGE_KEY);
+  } catch (e) {
+    console.warn('저장된 퍼즐 상태 삭제 실패:', e);
+  }
+
   renderBottles();
   renderPalette();
   updateInstructionText();
