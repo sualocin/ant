@@ -526,7 +526,7 @@ function updateTexts() {
 const initialColors = [
   "A21A1A", "CF560D", "DBB06C", "659D5C", 
   "0D670F", "3E7EC8", "332B7E", "9A059F", 
-  "F297E4", "58C9C7", "86661B", "959593"
+  "F297E4", "58C9C7", "86661B", "959593", "BE3C68"
 ];
 
 let colors = [...initialColors];
@@ -821,162 +821,57 @@ function triggerFileUpload() {
   fileInput.click();    
 }
 
-function processUploadedImage(event) {
+// === Water Sort image importer: port of the proven imageImport.js detector ===
+const DEFAULT_PALETTE = initialColors.map(c => `#${c}`);
+const COLOR_LABELS = initialColors.map((_, i) => String(i + 1));
+const UNKNOWN_LABEL = '?';
+function normalizePuzzle(p) { return p; }
+function validatePuzzle(p) { return { ok: true, message: '' }; }
+
+function t(t){return COLOR_LABELS[t]??String(t+1)}const e=4,n=6,o=.97,r=.99,a=.055,i=.02,s=.8,l=.22,c=.86,u=.34,h=.72,m=.35,d=.65,x=.035,b=.96,g=32,f=.52,p=.08,y=.14,M=.03,w=.1,R=[{name:"raw100-1080-three-row",rowTopRatios:[160/1544,616/1544,1052/1544],tubeHeightRatio:352/1544},{name:"raw100-1290-compact",rowTopRatios:[228/1845,772/1845,1277/1845],tubeHeightRatio:420/1845},{name:"raw100-1290-low",rowTopRatios:[368/1845,977/1845],tubeHeightRatio:420/1845}];function I(t,e,n){return Math.max(e,Math.min(n,t))}function v(t,e=0){if(!Array.isArray(t)||0===t.length)return e;const n=t.filter((t=>Number.isFinite(t))).slice().sort(((t,e)=>t-e));if(0===n.length)return e;const o=Math.floor(n.length/2);return n.length%2==0?(n[o-1]+n[o])/2:n[o]}function C(t,e,n){const o=t=>I(Math.round(t),0,255).toString(16).padStart(2,"0");return`#${o(t)}${o(e)}${o(n)}`}function N(t,e){const n=t[0]-e[0],o=t[1]-e[1],r=t[2]-e[2];return Math.hypot(n,o,r)}const A=DEFAULT_PALETTE.map((function(t){const e=function(t){return String(t).trim().toLowerCase()}(t).replace(/^#/,""),n=3===e.length?e.split("").map((t=>`${t}${t}`)).join(""):e;return[Number.parseInt(n.slice(0,2),16),Number.parseInt(n.slice(2,4),16),Number.parseInt(n.slice(4,6),16)]})),X=A.map((t=>S(t[0],t[1],t[2])));function S(t,e,n){const o=t/255,r=e/255,a=n/255,i=Math.max(o,r,a),s=i-Math.min(o,r,a);let l=0;return s>0&&(l=i===o?(r-a)/s%6*60:i===r?60*((a-o)/s+2):60*((o-r)/s+4)),l<0&&(l+=360),{h:l,s:0===i?0:s/i,v:i}}function W(t,e){const n=Math.abs(t-e);return Math.min(n,360-n)}function H(t){const e=S(t[0],t[1],t[2]);let o=0,r=Number.POSITIVE_INFINITY;for(let n=0;n<X.length;n+=1){const a=X[n],i=e.s>=.15&&a.s>=.12,s=.55*N(A[n],t)+W(e.h,a.h)*(i?2.4:.18)+34*Math.abs(e.s-a.s)+28*Math.abs(e.v-a.v);s<r&&(r=s,o=n)}return{index:o,distance:r}}function T(t,e,n,o){const r=I(Math.floor(n),0,e-1),a=4*(I(Math.floor(o),0,Math.floor(t.length/(4*e))-1)*e+r);return[t[a],t[a+1],t[a+2]]}function k(t,e,n){return{bright:(t+e+n)/3,sat:Math.max(t,e,n)-Math.min(t,e,n)}}const O={"\u25c7":t=>F(t,[[16,3.5],[28.5,16],[16,28.5],[3.5,16]]),"\u26a1":t=>F(t,[[20.5,2.5],[7.5,17.5],[15.2,17.5],[11.5,29.5],[25,12.5],[17.4,12.5]]),"\u271a":t=>D(t,"M13 3.5 H19 V13 H28.5 V19 H19 V28.5 H13 V19 H3.5 V13 H13 Z"),"\u{1f4a7}":t=>D(t,"M16 3.2 C21.6 10.2 25.5 16 25.5 21.2 C25.5 26.7 21.4 29.5 16 29.5 C10.6 29.5 6.5 26.7 6.5 21.2 C6.5 16 10.4 10.2 16 3.2 Z"),"\u25cb":t=>{t.beginPath(),t.arc(16,16,12.2,0,2*Math.PI),t.stroke()},"\u2212":t=>D(t,"M6 13.2 H26 V18.8 H6 Z"),"\u2606":t=>D(t,"M16 3.4 L19.7 11.6 L28.8 12.4 L22 18.3 L24.1 27.2 L16 22.5 L7.9 27.2 L10 18.3 L3.2 12.4 L12.3 11.6 Z"),"\u25a1":t=>{t.beginPath(),t.rect(6,6,20,20),t.stroke()},"\u25b3":t=>F(t,[[16,4.2],[29,27],[3,27]]),"\u2661":t=>D(t,"M16 28 C8.2 21.8 4.4 17.8 4.4 12.7 C4.4 8.8 7.2 6.3 10.6 6.3 C12.8 6.3 14.6 7.6 16 9.4 C17.4 7.6 19.2 6.3 21.4 6.3 C24.8 6.3 27.6 8.8 27.6 12.7 C27.6 17.8 23.8 21.8 16 28 Z"),\u2161:t=>{B(t,11,5.5,11,26.5),B(t,21,5.5,21,26.5)},"\u2b20":t=>F(t,[[16,3.5],[28.2,12.4],[23.6,27.5],[8.4,27.5],[3.8,12.4]]),"\u2715":t=>{B(t,7,7,25,25),B(t,25,7,7,25)},"\u25bd":t=>F(t,[[3.5,5.2],[28.5,5.2],[16,27.8]])};let Y=null;function F(t,e){t.beginPath(),e.forEach((([e,n],o)=>{0===o?t.moveTo(e,n):t.lineTo(e,n)})),t.closePath(),t.stroke()}function D(t,e){t.stroke(new Path2D(e))}function B(t,e,n,o,r){t.beginPath(),t.moveTo(e,n),t.lineTo(o,r),t.stroke()}function P(t,e,n=1){const o=new Uint8Array(t.length);for(let r=0;r<e;r+=1)for(let a=0;a<e;a+=1)if(t[r*e+a])for(let t=-n;t<=n;t+=1)for(let i=-n;i<=n;i+=1){const n=a+i,s=r+t;n>=0&&n<e&&s>=0&&s<e&&(o[s*e+n]=1)}return o}function L(t){let e=0;for(const n of t)e+=n?1:0;return e}function readFileAsDataUrl(t){return new Promise(((e,n)=>{const o=new FileReader;o.onload=()=>e(String(o.result??"")),o.onerror=()=>n(new Error("\uc774\ubbf8\uc9c0 \ubbf8\ub9ac\ubcf4\uae30\ub97c \ub9cc\ub4e4\uc9c0 \ubabb\ud588\uc5b4\uc694.")),o.readAsDataURL(t)}))}function U(t,e,n){const{bright:o,sat:r}=k(t,e,n);return(r>32||o>112)&&!(e>1.05*t&&e>1.03*n&&o<125&&r<45)}function E(t,e,n){if(void 0!==t.rowTopRatios[e])return Math.round(t.rowTopRatios[e]*n);if(t.rowTopRatios.length<2)return null;const o=t.rowTopRatios.length-1,r=t.rowTopRatios[o]-t.rowTopRatios[o-1];return Math.round((t.rowTopRatios[o]+r*(e-o))*n)}function V(t,e,n){if(0===t.length||e<=0)return null;const o=Math.max(36,.16*n);let r=null;for(const n of R){let o=0,a=0;for(let r=0;r<t.length;r+=1){const i=E(n,r,e);Number.isFinite(i)&&(o+=Math.abs(t[r].top-i),a+=1)}if(0===a)continue;const i=o/a;(!r||i<r.averageDistance)&&(r={profile:n,averageDistance:i})}return r&&r.averageDistance<=o?r.profile:null}function j(t,e,n,o){if(e<2||t.boxes.length>2)return n;const r=Number(t.bottom);if(!Number.isFinite(r)||!Number.isFinite(o)||o<=0)return n;const a=Math.round(r-o),i=Math.max(14,.18*o);return Math.abs(a-n)<=i?a:n}function $(t){return t.x2-t.x1}function z(t){return t.y2-t.y1}function G(t,e,n){const{bright:o,sat:r}=k(t,e,n);return o>=108&&r<=92&&Math.abs(t-e)<=42&&Math.abs(e-n)<=58}function Z(t,e){const n=$(e),o=z(e);if(n<=0||o<=0)return e.y1;const r=Math.max(0,Math.round(e.y1-.15*o)),a=Math.min(t.originalHeight-1,Math.round(e.y1+.03*o)),i=Math.max(0,Math.round(e.x1+.24*n)),s=Math.min(t.originalWidth-1,Math.round(e.x2-.12*n));let l=e.y1;for(let e=r;e<=a;e+=1){let n=0,o=0;for(let r=i;r<=s;r+=2){const[a,i,s]=T(t.originalData,t.originalWidth,r,e);o+=1,G(a,i,s)&&(n+=1)}if(o>0&&n/o>=.2){l=e;break}}return Math.min(e.y1,l)}function _(t,e){const n=z(e);if(!Number.isFinite(n)||n<=0)return e;const o=Z(t,e);if(e.y1-o<=Math.max(12,.04*n))return e;const r=Math.round(Math.max(4,.018*n)),a=Math.round(o+r-e.y1);return{...e,y1:e.y1+a,y2:e.y2+a,rimAligned:!0,rimTop:o,rimYShift:a}}function q(t,e){const n=Math.max(t.x1,e.x1),o=Math.max(t.y1,e.y1),r=Math.min(t.x2,e.x2),a=Math.min(t.y2,e.y2),i=Math.max(0,r-n)*Math.max(0,a-o);return i<=0?0:i/($(t)*z(t)+$(e)*z(e)-i)}function J(t){return t.originalWidth>=1200?i:a}function K(t,e=a){const n=$(t),i=z(t),s=(t.x1+t.x2)/2+n*e,l=(t.y1+t.y2)/2,c=Math.max(24,n*o),u=Math.max(48,i*r),h=Math.round(s-c/2),m=Math.round(l-u/2);return{...t,x1:h,y1:m,x2:Math.round(s+c/2),y2:Math.round(l+u/2)}}function Q(t,e,n,o){let r=0,a=0;for(let i=e;i<n;i+=1){const[e,n,s]=T(t.originalData,t.originalWidth,i,o);r+=(e+n+s)/3,a+=1}return a>0?r/a:0}function tt(t,e){const n=$(e),o=z(e),r=Math.round(e.x1),a=Math.round(e.x2),i=Math.round(e.y1),s=Math.round(e.y2),l=Math.max(2,Math.round(.05*n)),c=Math.max(l+4,Math.round(.16*n)),u=Math.max(c+4,Math.round(.24*n));let h=0,m=0;for(let e=i+Math.round(.08*o);e<s-Math.round(.04*o);e+=4)h+=Q(t,r+l,r+c,e)>Q(t,r+c,r+u,e)+10?1:0,h+=Q(t,a-c,a-l,e)>Q(t,a-u,a-c,e)+10?1:0,m+=2;let d=0,x=0;const b=Math.round(r+.38*n),g=Math.round(a-.38*n);for(let e=i+Math.round(.12*o);e<s-Math.round(.08*o);e+=8)for(let n=b;n<g;n+=4){const[o,r,a]=T(t.originalData,t.originalWidth,n,e),{bright:i}=k(o,r,a);d+=i<88?1:0,x+=1}let f=0,p=0,y=0;const M=Math.round(r+.12*n),w=Math.round(a-.12*n),R=i,I=i+Math.round(.16*o);for(let e=R;e<I;e+=1){let n=0,o=0;for(let r=M;r<w;r+=2){const[a,i,s]=T(t.originalData,t.originalWidth,r,e),{bright:l,sat:c}=k(a,i,s);n+=l>96&&c>10?1:0,o+=1}f+=n,p+=o,y=Math.max(y,o>0?n/o:0)}const v=m>0?h/m:0,C=x>0?d/x:0;return{edgeContrast:v,centerDarkRatio:C,topRimRatio:p>0?f/p:0,topRimRowRatio:y,score:.55*v+.2*C+.25*Math.min(y,.7)}}function et(t,e,n,o){const r=Math.round(t-n/2),a=Math.round(e);return{x1:r,y1:a,x2:r+Math.round(n),y2:a+Math.round(o)}}function nt(t,e,n,o,r){const a=[.64,.78,1],i=[0,.22*-o,.22*o,.44*-o,.44*o],s=[0,.08*-r,.08*r];let l=null;for(const c of a){const a=Math.max(44,Math.round(o*c));for(const c of i)for(const i of s){const s=et(e+c,n+i,a,r);if(s.x1<0||s.y1<0||s.x2>t.originalWidth||s.y2>t.originalHeight)continue;const u=tt(t,s),h=u.score-Math.abs(c)/Math.max(8*o,1)-Math.abs(i)/Math.max(10*r,1);(!l||h>l.adjustedScore)&&(l={...s,width:a,...u,adjustedScore:h})}}return l}function ot(t,e,n,o,r){return{...et(e,n,o,r),edgeContrast:t.edgeContrast,centerDarkRatio:t.centerDarkRatio,score:t.score,adjustedScore:t.adjustedScore,width:o}}function rt(t,e,n,o){const r=Math.max(.72*n,.56*o),a=[],i=new Set;for(const n of t.boxes){let t=-1,o=Number.POSITIVE_INFINITY;for(let r=0;r<e.length;r+=1){if(i.has(r))continue;const a=Math.abs(n.centerX-e[r]);a<o&&(o=a,t=r)}t>=0&&o<=r&&(i.add(t),a.push({box:n,columnIndex:t,offset:n.centerX-e[t]}))}return{usedColumns:i,minUsedColumn:a.length>0?Math.min(...a.map((t=>t.columnIndex))):-1,maxUsedColumn:a.length>0?Math.max(...a.map((t=>t.columnIndex))):-1,rowShift:v(a.map((t=>t.offset)),0),assignments:a}}function at(t){return t&&t.edgeContrast>=.4&&t.centerDarkRatio>=.97&&t.topRimRowRatio>=.22&&t.adjustedScore>=.43}function it(t){return t&&t.edgeContrast>=.44&&t.centerDarkRatio>=.99&&t.topRimRowRatio>=.22&&t.adjustedScore>=.5}function st(t,n){const o=K({...n},J(t)),r=Array.from({length:e},((e,n)=>bt(t,o,n))),a=r.map((t=>gt(t)));if(!a[0])return!1;let i=!1;for(let t=0;t<a.length;t+=1)if(a[t]){if(i)return!1}else i=!0;return r.some(((t,e)=>a[e]&&(pt(t)||t.symbolScore>=.58||t.dominantColorPixelRatio>=.35||t.activeRatio>=.72)))}function lt(t,n){const o=$(t),r=function(t,n){const o=z(t),r=(b-x)/e,a=x+(e-1-n)*r,i=a+r,s=t.y1+o*a,l=t.y1+o*i,c=l-s;return{y1:s+c*m,y2:s+c*d,slotY1:s,slotY2:l,contentTop:t.y1+o*x,contentBottom:t.y1+o*b}}(t,n),a=Math.round(t.x1+o*l),i=Math.round(t.x1+o*c),s=Math.round(r.y1);return{x1:a,y1:s,x2:i,y2:Math.max(s+1,Math.round(r.y2)),slotY1:r.slotY1,slotY2:r.slotY2,contentTop:r.contentTop,contentBottom:r.contentBottom}}function ct(t,e,n){const o=Math.max(t,e,n),r=Math.min(t,e,n);return(t+e+n)/3>=198&&r>=168&&o-r<=76}function ut(t,e){const n=g,o=new Uint8Array(n*n),r=Math.max(1,e.x2-e.x1),a=Math.max(1,e.y2-e.y1);for(let i=0;i<n;i+=1)for(let s=0;s<n;s+=1){const l=e.x1+(s+.5)*r/n,c=e.y1+(i+.5)*a/n,[u,h,m]=T(t.originalData,t.originalWidth,l,c);ct(u,h,m)&&(o[i*n+s]=1)}return{mask:o,dilated:P(o,n,1),count:L(o),boundsBox:mt(o,e)}}function ht(t,e){let n=e,o=e,r=-1,a=-1;for(let i=0;i<e;i+=1)for(let s=0;s<e;s+=1)t[i*e+s]&&(n=Math.min(n,s),o=Math.min(o,i),r=Math.max(r,s),a=Math.max(a,i));return r<n||a<o?null:{minX:n,minY:o,maxX:r,maxY:a}}function mt(t,e){const n=g,o=ht(t,n);if(!o)return null;const r=Math.max(1,e.x2-e.x1),a=Math.max(1,e.y2-e.y1);return{x1:e.x1+o.minX*r/n,x2:e.x1+(o.maxX+1)*r/n,y1:e.y1+o.minY*a/n,y2:e.y1+(o.maxY+1)*a/n}}function dt(t,e){if(!e||e.count<=0||t.count<5)return 0;let n=0;for(let o=0;o<e.mask.length;o+=1)e.mask[o]&&t.dilated[o]&&(n+=1);let o=0;for(let n=0;n<t.mask.length;n+=1)t.mask[n]&&e.dilated[n]&&(o+=1);return n/e.count*.58+o/t.count*.42}function xt(t,e){return t.find((t=>t.index===e))??null}function bt(e,n,o){const r=lt(n,o),{x1:a,x2:i,y1:s,y2:l}=r,c=$(n),m=n.x1+c*u,d=n.x1+c*h;let x=0,b=0,R=0,I=0,v=0,C=0,N=0,A=0,X=0,S=0,W=0;const F=Array(DEFAULT_PALETTE.length).fill(0),D=Array(DEFAULT_PALETTE.length).fill(0);for(let t=s;t<l;t+=2)for(let n=a;n<i;n+=2){if(n>m&&n<d)continue;const[o,r,a]=T(e.originalData,e.originalWidth,n,t),{bright:i,sat:s}=k(o,r,a);if(i>174&&s<52||i<28)continue;x+=o,b+=r,R+=a,I+=i,v+=s,N+=i>76||s>24?1:0,C+=1;const l=[o,r,a];if(ft(l,i,s)){A+=1;continue}const c=H(l);if(c.distance<140){const t=Math.max(1,140-c.distance);F[c.index]+=t,X+=t,D[c.index]+=1,S+=1}}if(0===C)return{rgb:[0,0,0],bright:0,sat:0,activeRatio:0,colorIndex:null,colorOnlyIndex:null,unknownRatio:0,colorVoteRatio:0};let B=null;if(X>0){let t=0,e=0;for(let n=0;n<F.length;n+=1)(D[n]>e||D[n]===e&&F[n]>t)&&(e=D[n],t=F[n],B=n);W=e/C}const U=[x/C,b/C,R/C],E=H(U),V=A/C,j=W>=.55&&E.distance<=65,z=V>=.18&&!j&&ft(U,I/C,v/C);(null===B||W<.75&&E.distance<90)&&(B=E.index);const G=B,Z=function(e,n,o){const r=function(){if(Y)return Y;const e=g,n=document.createElement("canvas");n.width=e,n.height=e;const o=n.getContext("2d",{willReadFrequently:!0});return o?(Y=DEFAULT_PALETTE.map(((n,r)=>{const a=t(r),i=O[a];if(!i)return null;o.clearRect(0,0,e,e),o.save(),o.scale(e/32,e/32),o.strokeStyle="#fff",o.lineWidth=3.2,o.lineCap="round",o.lineJoin="round",i(o),o.restore();const s=o.getImageData(0,0,e,e).data,l=new Uint8Array(e*e);for(let t=0;t<s.length;t+=4)l[t/4]=s[t+3]>22?1:0;return{index:r,label:a,mask:l,dilated:P(l,e,1),count:L(l)}})),Y):(Y=[],Y)}(),a=function(t,e){const n=$(t),o=lt(t,e),r=o.slotY2-o.slotY1;return{x1:Math.round(t.x1+n*y),x2:Math.round(t.x2-n*y),y1:Math.round(o.slotY1+r*M),y2:Math.round(o.slotY2-r*w)}}(n,o),i=function(t,e){const n=g,o=ut(t,e);if(o.count<5)return o;const r=ht(o.mask,n);if(!r)return o;const a=Math.max(1,e.x2-e.x1),i=Math.max(1,e.y2-e.y1),s=e.x1+r.minX*a/n,l=e.x1+(r.maxX+1)*a/n,c=e.y1+r.minY*i/n,u=e.y1+(r.maxY+1)*i/n,h=Math.max(1,l-s),m=Math.max(1,u-c),d=1.24*Math.max(h,m),x=(s+l)/2,b=(c+u)/2,f=ut(t,{x1:Math.max(e.x1,x-d/2),x2:Math.min(e.x2,x+d/2),y1:Math.max(e.y1,b-d/2),y2:Math.min(e.y2,b+d/2)});return f.count>=5?f:o}(e,a),s=[];for(const t of r){if(!t)continue;const e=dt(i,t);s.push({index:t.index,label:t.label,score:e})}s.sort(((t,e)=>e.score-t.score));const l=function(t){const e=g,n=ht(t.mask,e);if(!n)return{width:0,height:0,maxRow:0,maxCol:0,longRows:0,longCols:0,topAvg:0,midAvg:0,bottomAvg:0,topComponentAvg:0,midComponentAvg:0,bottomComponentAvg:0};const o=[],r=[],a=[];for(let a=n.minY;a<=n.maxY;a+=1){let i=0,s=0,l=!1;for(let o=n.minX;o<=n.maxX;o+=1){const n=Boolean(t.mask[a*e+o]);n&&(i+=1),n&&!l&&(s+=1),l=n}o.push(i),r.push(s)}for(let o=n.minX;o<=n.maxX;o+=1){let r=0;for(let a=n.minY;a<=n.maxY;a+=1)t.mask[a*e+o]&&(r+=1);a.push(r)}const i=(t,e,n)=>{const o=t.length;if(0===o)return 0;const r=Math.min(o-1,Math.max(0,Math.floor(o*e))),a=Math.min(o,Math.max(r+1,Math.floor(o*n))),i=t.slice(r,a);return i.reduce(((t,e)=>t+e),0)/i.length};return{width:n.maxX-n.minX+1,height:n.maxY-n.minY+1,maxRow:Math.max(...o),maxCol:Math.max(...a),longRows:o.filter((t=>t>=14)).length,longCols:a.filter((t=>t>=14)).length,topAvg:i(o,0,.25),midAvg:i(o,.35,.65),bottomAvg:i(o,.75,1),topComponentAvg:i(r,0,.25),midComponentAvg:i(r,.35,.65),bottomComponentAvg:i(r,.75,1)}}(i),c=function(e,n,o){if(!e||e.score<=0)return null;if(10===e.index&&e.score<.7&&o.width<=8&&o.maxRow<=8&&o.midComponentAvg<=1.1)return null;const r=xt(n,3);if(8===e.index&&r&&r.score>=e.score-.1&&o.maxRow<=12&&o.bottomAvg<=8)return{...r,shapeOverride:!0};const a=xt(n,2);if(1===e.index&&a&&a.score>=.5&&a.score>=e.score-.16&&function(t){return t.maxRow>=15&&t.maxCol>=18&&t.longRows>=2&&t.longCols>=2&&t.topAvg<=5.5&&t.bottomAvg<=5.5&&t.topComponentAvg>=1.4&&t.midComponentAvg>=1.6}(o))return{...a,index:2,label:t(2),shapeOverride:!0};const i=xt(n,9);if(13===e.index&&o.topComponentAvg>=2.9&&o.maxRow<=15&&o.midComponentAvg>=1.7)return{...i??{index:9,label:t(9),score:e.score},index:9,label:t(9),shapeOverride:!0};if([1,2,5,11].includes(e.index)&&function(t){return t.maxRow>=18&&t.topAvg>=11&&t.midAvg>t.topAvg&&t.bottomAvg<=11&&t.midComponentAvg<=1.4&&t.bottomComponentAvg<=1.2}(o))return{...xt(n,11)??{index:11,label:t(11),score:e.score},index:11,label:t(11),shapeOverride:!0};if(1===e.index&&function(t){return t.maxRow>=18&&t.midAvg>=12}(o)){if(o.maxRow>=20&&o.topAvg<=5&&o.bottomAvg<=5&&o.midComponentAvg>=1.7)return{...xt(n,2)??{index:2,label:t(2),score:e.score},index:2,label:t(2),shapeOverride:!0};if(o.topAvg<=4&&o.bottomAvg>=8&&o.bottomComponentAvg>=1.2)return{...xt(n,6)??{index:6,label:t(6),score:e.score},index:6,label:t(6),shapeOverride:!0}}return e}(s[0]??null,s,l);if(!c)return{index:null,label:"",score:0,secondScore:0,gap:0,scores:[],pixelRatio:0,box:a,boundsBox:null};const u=s.filter((t=>t.index!==c.index)).reduce(((t,e)=>Math.max(t,e.score)),0);return{...c,secondScore:u,gap:c.score-u,scores:s.slice(0,5),pixelRatio:i.count/(g*g),box:a,boundsBox:i.boundsBox??null}}(e,n,o),_=Z.score>=.84&&(Z.gap>=.07||3===Z.index&&Z.gap>=.035),q=9===Z.index&&Z.score>=.78&&Z.gap>=.055||9===Z.index&&8===G&&Z.score>=.76&&Z.gap>=.025||4===Z.index&&0===G&&Z.score>=.82&&E.distance>=40&&W<=.88||5===Z.index&&8===G&&0===o&&Z.score>=.62&&Z.gap>=.035&&v/C<=36,J=!(1===Z.index&&0===G&&Z.score<.82&&E.distance<=45&&W>=.65||4===Z.index&&7===G&&Z.score<.83&&W>=.85||9===Z.index&&4===G&&Z.score<.72&&E.distance<=35&&W>=.85||12===Z.index&&8===G&&Z.score<.7||12===Z.index&&9===G&&Z.score<.7&&E.distance<=45&&W>=.75||13===Z.index&&9===G&&Z.score<.72&&E.distance<=45&&W>=.65||7===Z.index&&10===G&&Z.score<.82||Number.isInteger(G)&&Z.index!==G&&!q&&Z.score<.84&&E.distance<=90&&W>=.3)&&Z.score>=f&&(Z.gap>=p||_||q||Z.shapeOverride),K=Boolean(J&&!z&&Number.isInteger(Z.index));return K&&(B=Z.index),{rgb:U,bright:I/C,sat:v/C,activeRatio:N/C,colorIndex:B,colorOnlyIndex:G,matchDistance:E.distance,dominantColorPixelRatio:W,symbolIndex:Z.index,symbolLabel:Z.label,symbolScore:Z.score,symbolGap:Z.gap,symbolScores:Z.scores,symbolShapeOverride:Boolean(Z.shapeOverride),symbolPixelRatio:Z.pixelRatio,symbolConfident:J,symbolApplied:K,symbolBox:Z.box,symbolBoundsBox:Z.boundsBox,unknownRatio:V,colorVoteRatio:S/C}}function gt(t){return!function(t){const[e,n,o]=Array.isArray(t.rgb)?t.rgb:[0,0,0];return t.bright<88&&t.sat<=44&&n>1.18*e&&n>1.06*o&&t.unknownRatio<.12&&(!Number.isFinite(t.symbolScore)||t.symbolScore<.45)}(t)&&t.activeRatio>=.56&&(t.sat>=18||t.bright>=88)}function ft(t,e,n){const[o,r,a]=t;return o>=62&&o<=155&&r>=36&&r<=110&&a>=26&&a<=96&&o>r+6&&r>=a-12&&e>=48&&e<=142&&n>=10&&n<=86}function pt(t){const e=Number(t.dominantColorPixelRatio)>=.55&&Number(t.matchDistance)<=65;return t.unknownRatio>=.34||t.unknownRatio>=.18&&!e&&ft(t.rgb,t.bright,t.sat)}function yt(t){const[e,n,o]=Array.isArray(t)?t:[0,0,0];return e>=145&&e<=190&&n>=108&&n<=150&&o>=68&&o<=110&&e>n+12&&n>o+12}function Mt(t,e,n,o){if(!Number.isInteger(e)||e<0||e>=t.length)return;const r=t[e];r.rgb[0]+=n[0]*o,r.rgb[1]+=n[1]*o,r.rgb[2]+=n[2]*o,r.weight+=o}function wt(t,e){const n=S(t[0],t[1],t[2]);let o=0,r=Number.POSITIVE_INFINITY;for(let a=0;a<e.length;a+=1){const i=e[a],s=n.s>=.15&&i.hsv.s>=.12,l=N(i.rgb,t)*(i.observed?.85:.55)+W(n.h,i.hsv.h)*(s?i.observed?1.4:2.4:.18)+Math.abs(n.s-i.hsv.s)*(i.observed?18:34)+Math.abs(n.v-i.hsv.v)*(i.observed?18:28);l<r&&(r=l,o=a)}return{index:o,distance:r}}function Rt(t,e){const n=Number.isInteger(e?.index)?e.index:null,o=Number.isInteger(t.colorOnlyIndex)?t.colorOnlyIndex:null;return Number.isInteger(n)?Number.isInteger(o)&&o!==n&&(Number.isInteger(t.symbolIndex)&&t.symbolIndex===o&&t.symbolScore>=.64||Number(t.matchDistance)<=45&&Number(t.dominantColorPixelRatio)>=.72||Number(t.matchDistance)<=42&&Number(e.distance)>=Number(t.matchDistance)+10)?o:n:o}async function detectPuzzleFromImageFile(o){const r=await function(t){return new Promise(((e,n)=>{const o=new Image,r=URL.createObjectURL(t);o.onload=()=>{URL.revokeObjectURL(r),e(o)},o.onerror=()=>{URL.revokeObjectURL(r),n(new Error("\uc774\ubbf8\uc9c0\ub97c \uc77d\uc9c0 \ubabb\ud588\uc5b4\uc694."))},o.src=r}))}(o),a=function(t){const e=Math.floor(.18*t.height),n=Math.floor(.84*t.height),o=Math.max(1,n-e),r=document.createElement("canvas");r.width=t.width,r.height=o;const a=r.getContext("2d",{willReadFrequently:!0});if(!a)throw new Error("\uc774\ubbf8\uc9c0 \ud310\ub3c5\uc6a9 \uce94\ubc84\uc2a4\ub97c \ub9cc\ub4e4\uc9c0 \ubabb\ud588\uc5b4\uc694.");a.drawImage(t,0,e,t.width,o,0,0,t.width,o);const i=a.getImageData(0,0,t.width,o).data,s=Math.max(1,Math.floor(t.width/4)),l=Math.max(1,Math.floor(o/4)),c=document.createElement("canvas");c.width=s,c.height=l;const u=c.getContext("2d",{willReadFrequently:!0});if(!u)throw new Error("\uc774\ubbf8\uc9c0 \ucd95\uc18c \uc0d8\ud50c\uc744 \ub9cc\ub4e4\uc9c0 \ubabb\ud588\uc5b4\uc694.");u.imageSmoothingEnabled=!0,u.drawImage(r,0,0,t.width,o,0,0,s,l);const h=u.getImageData(0,0,s,l).data;return{cropTop:e,originalWidth:t.width,originalHeight:o,originalData:i,sampleWidth:s,sampleHeight:l,sampleData:h,scaleX:t.width/s,scaleY:o/l}}(r),i=function(t){const e=t.map((t=>({...t})));let n=!0;for(;n;){n=!1;t:for(let t=0;t<e.length;t+=1)for(let o=t+1;o<e.length;o+=1){const r=e[t],a=e[o],i=r.y1<=a.y1?r:a,s=i===r?a:r,l=s.y1-i.y2,c=Math.min(i.x2,s.x2)-Math.max(i.x1,s.x1),u=Math.max(1,Math.min(i.width,s.width)),h=Math.max(i.y2,s.y2)-Math.min(i.y1,s.y1),m=Math.abs(i.centerX-s.centerX);if(l<0||l>8||c/u<.55||m>.35*Math.max(i.width,s.width)||h>140)continue;const d=Math.min(i.x1,s.x1),x=Math.min(i.y1,s.y1),b=Math.max(i.x2,s.x2),g=Math.max(i.y2,s.y2),f=i.area+s.area;e[t]={x1:d,y1:x,x2:b,y2:g,width:b-d,height:g-x,centerX:(i.centerX*i.area+s.centerX*s.area)/f,centerY:(i.centerY*i.area+s.centerY*s.area)/f,area:f},e.splice(o,1),n=!0;break t}}return e.sort(((t,e)=>t.y1-e.y1||t.x1-e.x1))}(function(t){const e=t.sampleWidth*t.sampleHeight,n=new Uint8Array(e);for(let e=0;e<t.sampleHeight;e+=1)for(let o=0;o<t.sampleWidth;o+=1){const[r,a,i]=T(t.sampleData,t.sampleWidth,o,e);U(r,a,i)&&(n[e*t.sampleWidth+o]=1)}const o=new Uint8Array(e),r=[],a=[-t.sampleWidth-1,-t.sampleWidth,1-t.sampleWidth,-1,1,t.sampleWidth-1,t.sampleWidth,t.sampleWidth+1];for(let i=0;i<e;i+=1){if(!n[i]||o[i])continue;let s=t.sampleWidth,l=t.sampleHeight,c=0,u=0,h=0;const m=[i];for(o[i]=1;m.length>0;){const r=m.pop();if(void 0===r)continue;const i=r%t.sampleWidth,d=Math.floor(r/t.sampleWidth);s=Math.min(s,i),l=Math.min(l,d),c=Math.max(c,i),u=Math.max(u,d),h+=1;for(const s of a){const a=r+s;if(a<0||a>=e||o[a]||!n[a])continue;const l=a%t.sampleWidth;Math.abs(l-i)>1||(o[a]=1,m.push(a))}}const d=c-s+1,x=u-l+1;d<12||d>48||x<28||x>140||h<180||r.push({x1:s,y1:l,x2:c+1,y2:u+1,width:d,height:x,centerX:(s+c)/2,centerY:(l+u)/2,area:h})}return r.sort(((t,e)=>t.y1-e.y1||t.x1-e.x1))}(a));if(i.length<2)throw new Error("\ubcd1\uc744 \ucda9\ubd84\ud788 \ucc3e\uc9c0 \ubabb\ud588\uc5b4\uc694. \uac8c\uc784 \uc2a4\ud06c\ub9b0\uc0f7\uc744 \uc870\uae08 \ub354 \ud06c\uac8c \uc798\ub77c\uc11c \ub2e4\uc2dc \ub123\uc5b4 \uc8fc\uc138\uc694.");const l=function(t,e){const o=function(t){if(0===t.length)return[];const e=Math.max(12,.45*v(t.map((t=>t.height)),28)),o=[];for(const n of t){const t=o[o.length-1];!t||Math.abs(n.y1-t.referenceTop)>e?o.push({boxes:[n],referenceTop:n.y1}):(t.boxes.push(n),t.referenceTop+=(n.y1-t.referenceTop)/t.boxes.length)}return function(t){const e=[];for(const o of t){const t=e[e.length-1],r=t?o.top-t.top:Number.POSITIVE_INFINITY,a=t?.72*Math.max(t.height,o.height):0,i=!!t&&t.boxes.every((t=>o.boxes.every((e=>Math.abs(t.centerX-e.centerX)>.65*Math.max(t.width,e.width)))));t&&r>0&&r<=a&&t.boxes.length+o.boxes.length<=n&&i?(t.boxes=t.boxes.concat(o.boxes).sort(((t,e)=>t.centerX-e.centerX)),t.top=Math.min(t.top,o.top),t.bottom=Math.max(t.bottom,o.bottom),t.height=Math.max(t.height,o.height+r)):e.push({...o,boxes:o.boxes.slice()})}return e}(o.map((t=>{const e=t.boxes.slice().sort(((t,e)=>t.centerX-e.centerX)),o=e.length<=n?e:e.slice().sort(((t,e)=>e.area-t.area)).slice(0,n).sort(((t,e)=>t.centerX-e.centerX));return{top:Math.min(...o.map((t=>t.y1))),bottom:Math.max(...o.map((t=>t.y2))),height:Math.max(...o.map((t=>t.height))),boxes:o}})))}(e);if(0===o.length)return{boxes:[],rows:[],tubeWidth:0,tubeHeight:0,columnCenters:[],columnSpacing:0,rowGap:0};const r=Math.round(v(e.map((t=>t.width)),28)*t.scaleX),a=Math.round(v(e.map((t=>t.height)),100)*t.scaleY),i=o.map((e=>{const n=Math.round(e.top*t.scaleY),o=Math.round(e.bottom*t.scaleY),i=e.boxes.map((e=>{const o=e.centerX*t.scaleX,i=Math.round(o-r/2);return{x1:i,y1:n,x2:i+r,y2:n+a,centerX:o}}));return{top:n,bottom:o,boxes:i.slice().sort(((t,e)=>t.centerX-e.centerX))}})),l=V(i,t.originalHeight,a),c=(u=l,h=t.originalHeight,m=a,u&&Number.isFinite(u.tubeHeightRatio)&&h>0?Math.round(u.tubeHeightRatio*h):m);var u,h,m;const d=function(t,e,n,o=null){if(t.length<=1)return t;const r=o??V(t,n.originalHeight,e);if(r)return t.map(((t,o)=>{const a=E(r,o,n.originalHeight);if(!Number.isFinite(a))return t;const i=j(t,o,a,e);return{...t,top:i,bottom:i+e,boxes:t.boxes.map((t=>({...t,y1:i,y2:i+e})))}}));const a=Math.max(...t.map((t=>t.boxes.length))),i=Math.max(3,Math.ceil(.66*a)),s=[],l=[];for(let e=1;e<t.length;e+=1){const n=t[e-1],o=t[e],r=o.top-n.top;r<=0||(l.push(r),n.boxes.length>=i&&o.boxes.length>=i&&s.push(r))}const c=Math.round(v(s,v(l,1.18*e)));if(!Number.isFinite(c)||c<=0)return t;const u=t[0].top;return t.map(((t,n)=>{const o=j(t,n,Math.round(u+c*n),e);return{...t,top:o,bottom:o+e,boxes:t.boxes.map((t=>({...t,y1:o,y2:o+e})))}}))}(i,c,t,l),x=d.reduce(((t,e)=>e.boxes.length>t.boxes.length?e:t),d[0]).boxes.slice(0,n),b=[];for(const t of d)for(let e=1;e<t.boxes.length;e+=1)b.push(t.boxes[e].centerX-t.boxes[e-1].centerX);const g=v(b,1.2*r),f=function(t,e,n){if(t.length<4||!Number.isFinite(e)||e<=0)return!1;const o=[];for(let n=1;n<t.length;n+=1)o.push(Math.abs(t[n].centerX-t[n-1].centerX-e));return Math.max(...o)>Math.max(10,.08*n)}(x,g,r),p=f?function(t,e){if(t.length<3||!Number.isFinite(e)||e<=0)return t.map((t=>t.centerX));const n=v(t.map(((t,n)=>t.centerX-e*n)),t[0].centerX);return t.map(((t,o)=>n+e*o))}(x,g):x.map((t=>t.centerX)),y=f?function(t,e,n,o){return e.length<3?t:t.map((t=>{if(t.boxes.length!==e.length)return t;const r=rt(t,e,n,o);if(0===r.assignments.length)return t;const a=new Map(r.assignments.map((t=>[t.box,t]))),i=t.boxes.map((t=>{const o=a.get(t);if(!o)return t;const i=e[o.columnIndex]+r.rowShift,s=Math.round(i-n/2);return{...t,x1:s,x2:s+n,centerX:i}}));return{...t,boxes:i.slice().sort(((t,e)=>t.centerX-e.centerX))}}))}(d,p,r,g):d,M=t.originalWidth<=1100&&2===y.length,w=Math.round(Math.max(r,M?g*s:r)),R=w!==r?function(t,e){return t.map((t=>({...t,boxes:t.boxes.map((t=>{const n=Number.isFinite(t.centerX)?t.centerX:(t.x1+t.x2)/2,o=Math.round(n-e/2);return{...t,x1:o,x2:o+e,centerX:n}}))})))}(y,w):y,I=[];for(let t=1;t<R.length;t+=1)I.push(R[t].top-R[t-1].top);return{boxes:R.flatMap((t=>t.boxes.map((({centerX:t,...e})=>e)))),rows:R,tubeWidth:w,tubeHeight:c,columnCenters:p,columnSpacing:g,rowGap:v(I,1.18*c)}}(a,i),c=function(t,e){if(0===e.boxes.length||0===e.columnCenters.length)return[];const o=[],r=e.boxes.slice();for(const a of e.rows){if(a.boxes.length>=n)continue;const i=rt(a,e.columnCenters,e.tubeWidth,e.columnSpacing);if(!(i.minUsedColumn<0))for(let n=0;n<e.columnCenters.length;n+=1){if(i.usedColumns.has(n))continue;const s=et(e.columnCenters[n]+i.rowShift,a.top,e.tubeWidth,e.tubeHeight);s.x1<0||s.y1<0||s.x2>t.originalWidth||s.y2>t.originalHeight||r.some((t=>q(t,s)>.14))||o.some((t=>q(t,s)>.28))||st(t,s)&&o.push({...s,importRole:"filled-predicted"})}}return o}(a,l),u={...l,boxes:[...l.boxes,...c]},h=function(t,e){if(0===e.boxes.length||0===e.columnCenters.length)return[];const n=[],o=e.boxes.slice();for(const r of e.rows){if(n.length>=2)break;const a=rt(r,e.columnCenters,e.tubeWidth,e.columnSpacing);for(let i=0;i<e.columnCenters.length&&!(n.length>=2);i+=1){if(a.usedColumns.has(i))continue;const s=e.columnCenters[i]+a.rowShift,l=nt(t,s,r.top,e.tubeWidth,e.tubeHeight);if(!at(l))continue;const c=ot(l,s,r.top,e.tubeWidth,e.tubeHeight);o.some((t=>q(t,l)>.14||q(t,c)>.14))||n.some((t=>q(t,l)>.28||q(t,c)>.28))||n.push(c)}}if(e.rows.length>=2){const r=Math.round(e.rows[e.rows.length-1].top+e.rowGap),a=e.columnCenters.map(((n,o)=>({columnCenter:n,columnIndex:o,candidate:nt(t,n,r,e.tubeWidth,e.tubeHeight)}))).filter((t=>t.candidate)).sort(((t,e)=>e.candidate.adjustedScore-t.candidate.adjustedScore));for(const{columnCenter:t,candidate:i}of a){if(n.length>=2)break;if(!it(i)||o.some((t=>q(t,i)>.14)))continue;const a=ot(i,t,r,e.tubeWidth,e.tubeHeight);o.some((t=>q(t,a)>.14))||n.some((t=>q(t,a)>.28))||n.push(a)}}return n.slice(0,2)}(a,u).map((t=>_(a,K({...t,importRole:"empty-candidate"},J(a))))),m=u.boxes.map((t=>_(a,K({...t,importRole:"filled"},J(a))))),d=function(n,o){const r=[],a=function(t){const e=Math.max(24,.3*v(t.map(z),380));return t.slice().sort(((t,n)=>Math.abs(t.y1-n.y1)>e?t.y1-n.y1:t.x1-n.x1))}(o).map((t=>({tubeBox:t,cells:Array.from({length:e},((e,o)=>bt(n,t,o)))}))),i=function(t){const e=DEFAULT_PALETTE.map((()=>({rgb:[0,0,0],weight:0})));for(const n of t)for(const t of n.cells){const n=gt(t),o=n&&pt(t);if(!n||o||!Number.isInteger(t.colorIndex))continue;const r=Number.isInteger(t.symbolIndex)&&t.symbolIndex===t.colorIndex&&(t.symbolApplied||t.symbolScore>=.78&&t.symbolGap>=.05),a=t.dominantColorPixelRatio>=.83&&t.matchDistance<=42;r?Mt(e,t.colorIndex,t.rgb,t.symbolApplied?2.5:1.6):a&&Mt(e,t.colorIndex,t.rgb,1)}return e.map(((t,e)=>{if(t.weight<=0)return{rgb:A[e],hsv:X[e],observed:!1};const n=[t.rgb[0]/t.weight,t.rgb[1]/t.weight,t.rgb[2]/t.weight];return{rgb:n,hsv:S(n[0],n[1],n[2]),observed:!0}}))}(a),s=a.map((({tubeBox:o,cells:a},s)=>{const l=[],c=[];let u=!0;for(let n=0;n<e;n+=1){const r=a[n],s=gt(r),h=s&&pt(r),m=h&&l.some((t=>!t.hidden))&&Number.isInteger(r.colorOnlyIndex)&&r.unknownRatio<.65,d=h&&!m,x=s&&!d?wt(r.rgb,i):null;let b=s&&!d?Rt(r,x):null;5===b&&8===r.colorOnlyIndex&&n>0&&(b=8),m&&3===r.colorOnlyIndex&&yt(r.rgb)&&(b=0);const g=s&&!d&&r.symbolConfident&&Number.isInteger(r.symbolIndex)?r.symbolIndex:null,f=s&&!d?r.symbolApplied&&Number.isInteger(r.symbolIndex)?r.symbolIndex:b:null,p=lt(o,n),y=s?d?UNKNOWN_LABEL:t(f):"\ube48";c.push({cellIndex:n,slotNumber:e-n,sampleBox:p,rgb:r.rgb.map((t=>Math.round(t))),hex:C(r.rgb[0],r.rgb[1],r.rgb[2]),bright:Math.round(r.bright),sat:Math.round(r.sat),activeRatio:Number(r.activeRatio.toFixed(3)),matchDistance:Number((r.matchDistance??0).toFixed(1)),calibratedMatchDistance:Number((x?.distance??0).toFixed(1)),dominantColorPixelRatio:Number((r.dominantColorPixelRatio??0).toFixed(3)),rawColorOnlyIndex:Number.isInteger(r.colorOnlyIndex)?r.colorOnlyIndex:null,rawColorOnlyLabel:Number.isInteger(r.colorOnlyIndex)?t(r.colorOnlyIndex):"",colorOnlyIndex:Number.isInteger(b)?b:null,colorOnlyLabel:Number.isInteger(b)?t(b):"",symbolIndex:Number.isInteger(r.symbolIndex)?r.symbolIndex:null,symbolLabel:r.symbolLabel??"",symbolOnlyIndex:g,symbolOnlyLabel:Number.isInteger(g)?t(g):"",symbolScore:Number((r.symbolScore??0).toFixed(3)),symbolGap:Number((r.symbolGap??0).toFixed(3)),symbolScores:Array.isArray(r.symbolScores)?r.symbolScores.map((t=>({index:t.index,label:t.label,score:Number(t.score.toFixed(3))}))):[],symbolPixelRatio:Number((r.symbolPixelRatio??0).toFixed(3)),symbolConfident:Boolean(r.symbolConfident),symbolApplied:Boolean(r.symbolApplied),symbolShapeOverride:Boolean(r.symbolShapeOverride),symbolCountRepairApplied:!1,symbolBox:r.symbolBox,symbolBoundsBox:r.symbolBoundsBox,unknownRatio:Number(r.unknownRatio.toFixed(3)),colorVoteRatio:Number(r.colorVoteRatio.toFixed(3)),colorIndex:f,colorHex:Number.isInteger(f)?DEFAULT_PALETTE[f]:null,hidden:d,occupied:s,label:y}),u&&(s?d?l.push({color:null,hidden:!0}):l.push({color:f,hidden:!1}):u=!1)}const h="empty-candidate"===o.importRole&&l.length>0?"filled":o.importRole??"filled",m=function(t,e){return{...e,y1:Z(t,e)}}(n,o);return r.push({index:s,role:h,box:{x1:Math.round(o.x1),y1:Math.round(o.y1),x2:Math.round(o.x2),y2:Math.round(o.y2)},displayBox:{x1:Math.round(m.x1),y1:Math.round(m.y1),x2:Math.round(m.x2),y2:Math.round(m.y2)},cells:c,colors:l.map((e=>e.hidden?UNKNOWN_LABEL:t(e.color)))}),{cap:e,colors:l}}));return{puzzle:normalizePuzzle({full:e,palette:DEFAULT_PALETTE.slice(),tubes:s}),debugTubes:r}}(a,[...m,...h]),x=d.debugTubes.filter((t=>"empty-candidate"===t.role)).length,b=d.debugTubes.length-x,{puzzle:g}=d,f=validatePuzzle(g),p=g.tubes.length,y=g.tubes.filter((t=>0===t.colors.length)).length,M=function(t){let e=0;for(const n of t.tubes)for(const t of n.colors)t.hidden&&null===t.color&&(e+=1);return e}(g),w="string"==typeof o?.name&&o.name?o.name:"\uc120\ud0dd\ud55c \uc774\ubbf8\uc9c0";return{puzzle:g,debug:{imageWidth:r.width,imageHeight:r.height,cropTop:a.cropTop,cropHeight:a.originalHeight,sampleWidth:a.sampleWidth,sampleHeight:a.sampleHeight,filledComponentCount:i.length,filledTubeCount:b,emptyCandidateCount:x,tubeCount:p,rows:l.rows.map((t=>({top:Math.round(t.top),bottom:Math.round(t.bottom??t.top+l.tubeHeight),tubeCount:t.boxes.length}))),tubes:d.debugTubes},message:f.ok?`${w}: \uc774\ubbf8\uc9c0\uc5d0\uc11c ${p}\ubcd1, \uc0c9 ${g.palette.length}\uac1c, \uc228\uae40 ? ${M}\uce78\uc744 \uc77d\uc5b4\uc654\uc5b4\uc694.${y>0?` \ube48 \ubcd1 ${y}\uac1c\ub3c4 \ud568\uaed8 \ubc18\uc601\ud588\uc5b4\uc694.`:""} \ubca0\ud0c0\ub77c\uc11c \uc0c9\uc774\ub098 \ube48 \ubcd1\uc774 \ud558\ub098 \uc5b4\uae0b\ub098\uba74 \ubcf4\ub4dc\uc5d0\uc11c \ubc14\ub85c \uace0\uccd0 \uc8fc\uc138\uc694.`:`${w}: \uc774\ubbf8\uc9c0\ub97c \uc77d\uc5b4\uc640 \ubcf4\ub4dc\uc5d0 \ub123\uc5c8\uc5b4\uc694. \ub2e4\ub9cc \uc544\uc9c1 "${f.message}" \uc0c1\ud0dc\uc77c \uc218 \uc788\uc5b4\uc11c \ubcf4\ub4dc\uc5d0\uc11c \ud55c \ubc88 \uc190\ubcf4\ub294 \uac78 \ucd94\ucc9c\ud574\uc694.`}}
+async function processUploadedImage(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  const img = new Image();
-  img.onload = function() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
+  const t = translations[currentLang];
+  try {
+    const result = await detectPuzzleFromImageFile(file);
+    const puzzle = result.puzzle;
 
-    const w = img.width;
-    const h = img.height;
-    const t = translations[currentLang];
-
-    const check13 = checkBottleRimAt(ctx, Math.floor(0.500 * w), Math.floor(0.635 * h));
-    const check14 = checkBottleRimAt(ctx, Math.floor(0.428 * w), Math.floor(0.635 * h));
-
-    let layouts = [
-      { xPct: 0.141, yBasePct: 0.368 },
-      { xPct: 0.285, yBasePct: 0.368 },
-      { xPct: 0.428, yBasePct: 0.368 },
-      { xPct: 0.572, yBasePct: 0.368 },
-      { xPct: 0.715, yBasePct: 0.368 },
-      { xPct: 0.859, yBasePct: 0.368 },
-      { xPct: 0.141, yBasePct: 0.560 },
-      { xPct: 0.285, yBasePct: 0.560 },
-      { xPct: 0.428, yBasePct: 0.560 },
-      { xPct: 0.572, yBasePct: 0.560 },
-      { xPct: 0.715, yBasePct: 0.560 },
-      { xPct: 0.859, yBasePct: 0.560 }
-    ];
-
-    if (check13) {
-      layouts.push({ xPct: 0.500, yBasePct: 0.730 });
-    } else if (check14) {
-      layouts.push({ xPct: 0.428, yBasePct: 0.730 });
-      layouts.push({ xPct: 0.572, yBasePct: 0.730 });
-    }
-
-    const segmentGapPct = 0.033;
-    let detectedData = [];
-
-    layouts.forEach((pos) => {
-      let bottle = [];
-      const centerX = Math.floor(pos.xPct * w);
-
-      let rawSegments = [];
-      for (let sIdx = 3; sIdx >= 0; sIdx--) {
-        const centerY = Math.floor((pos.yBasePct - ((3 - sIdx) * segmentGapPct)) * h);
-        
-        const sampleSize = 2;
-        const imgData = ctx.getImageData(centerX - sampleSize, centerY - sampleSize, sampleSize * 2 + 1, sampleSize * 2 + 1);
-        const pixels = imgData.data;
-
-        let rSum = 0, gSum = 0, bSum = 0, count = 0;
-        for (let i = 0; i < pixels.length; i += 4) {
-          rSum += pixels[i];
-          gSum += pixels[i+1];
-          bSum += pixels[i+2];
-          count++;
+    // imageImport.js는 bottom -> top 순서의 color index를 반환한다.
+    bottlesData = (puzzle.tubes || []).map(tube => {
+      const out = [];
+      for (const cell of (tube.colors || [])) {
+        if (cell.hidden && cell.color === null) {
+          out.push('?');
+        } else if (Number.isInteger(cell.color) && DEFAULT_PALETTE[cell.color]) {
+          out.push(DEFAULT_PALETTE[cell.color].replace('#', '').toUpperCase());
         }
-
-        const avgR = rSum / count;
-        const avgG = gSum / count;
-        const avgB = bSum / count;
-
-        rawSegments.push({ avgR, avgG, avgB, pixels });
       }
-
-      const emptyCount = rawSegments.filter(seg => isTransparentGlassBg(seg.avgR, seg.avgG, seg.avgB, seg.pixels)).length;
-      
-      if (emptyCount >= 3) {
-        detectedData.push([]); 
-      } else {
-        rawSegments.forEach(seg => {
-          if (isTransparentGlassBg(seg.avgR, seg.avgG, seg.avgB, seg.pixels)) {
-            return;
-          } else if (isQuestionMarkSegment(seg.avgR, seg.avgG, seg.avgB, seg.pixels)) {
-            bottle.push('?');
-          } else {
-            const matchedHex = findClosestColor(seg.avgR, seg.avgG, seg.avgB);
-            bottle.push(matchedHex);
-          }
-        });
-        detectedData.push(bottle);
-      }
+      return out;
     });
 
-    bottleCount = detectedData.length;
-    bottlesData = detectedData;
+    bottleCount = bottlesData.length;
     selectedBottleIndex = null;
+    selectedPaletteHex = null;
 
     renderBottles();
     renderPalette();
     updateInstructionText();
-    alert(t.analysisDone(bottleCount));
-  };
 
-  img.src = URL.createObjectURL(file);
-}
+    const hiddenCount = bottlesData.flat().filter(c => c === '?').length;
+    const emptyCount = bottlesData.filter(b => b.length === 0).length;
+    let msg = `✨ 이미지 분석 완료! 총 ${bottleCount}개의 Clear Bottle이 세팅되었습니다.`;
+    if (hiddenCount > 0) msg += ` 물음표 ${hiddenCount}칸도 인식했습니다.`;
+    if (emptyCount > 0) msg += ` 빈 병 ${emptyCount}개도 반영했습니다.`;
+    alert(msg);
 
-function checkBottleRimAt(ctx, x, y) {
-  const sample = ctx.getImageData(x - 2, y - 2, 5, 5).data;
-  let brightness = 0;
-  for (let i = 0; i < sample.length; i += 4) {
-    brightness += (sample[i] + sample[i+1] + sample[i+2]) / 3;
+    // 개발/검증용: 실제 검출 결과를 콘솔에서 확인할 수 있다.
+    console.debug('[WaterSort Image Import]', result.debug, bottlesData);
+  } catch (error) {
+    console.error(error);
+    alert(`❌ 이미지 인식 실패: ${error instanceof Error ? error.message : '이미지를 해석하지 못했습니다.'}`);
   }
-  return (brightness / (sample.length / 4)) > 42;
-}
-
-function isTransparentGlassBg(r, g, b, pixels) {
-  const brightness = (r + g + b) / 3;
-  let hasWhiteText = false;
-  for (let i = 0; i < pixels.length; i += 4) {
-    if (pixels[i] > 195 && pixels[i+1] > 195 && pixels[i+2] > 195) {
-      hasWhiteText = true;
-      break;
-    }
-  }
-  
-  const colorDiff = Math.max(r, g, b) - Math.min(r, g, b);
-  return (brightness < 55 && colorDiff < 20 && !hasWhiteText) || brightness < 35;
-}
-
-function isQuestionMarkSegment(r, g, b, pixels) {
-  const isDarkBrownBg = (r >= 30 && r <= 110) && (g >= 15 && g <= 70) && (b >= 5 && b <= 50);
-  
-  let hasWhiteText = false;
-  for (let i = 0; i < pixels.length; i += 4) {
-    if (pixels[i] > 190 && pixels[i+1] > 190 && pixels[i+2] > 190) {
-      hasWhiteText = true;
-      break;
-    }
-  }
-  return isDarkBrownBg || hasWhiteText;
-}
-
-function findClosestColor(r, g, b) {
-  let minDistance = Infinity;
-  let closestHex = colors[0];
-
-  colors.forEach(hex => {
-    const cr = parseInt(hex.substring(0, 2), 16);
-    const cg = parseInt(hex.substring(2, 4), 16);
-    const cb = parseInt(hex.substring(4, 6), 16);
-
-    const dist = Math.pow(r - cr, 2) + Math.pow(g - cg, 2) + Math.pow(b - cb, 2);
-    if (dist < minDistance) {
-      minDistance = dist;
-      closestHex = hex;
-    }
-  });
-
-  return closestHex;
 }
 
 function inferMissingColors(boardState) {
