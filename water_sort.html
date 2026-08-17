@@ -447,7 +447,7 @@ const translations = {
     btnSolve: "배치 정답 구하기 🚀",
     tabImage: "🎨 이미지 답",
     tabText: "📄 텍스트 답",
-    bottleCountText: (count) => `Bottle: ${count}개`,
+    bottleCountText: (count) => `Clear Bottle: ${count}개`,
     eraserTitle: "선택된 병의 맨 위 칸 지우기",
     unknownTitle: "모르는 색상 (물음표) 입력",
     customPlaceholder: "HEX 코드",
@@ -526,7 +526,7 @@ function updateTexts() {
 const initialColors = [
   "A21A1A", "CF560D", "DBB06C", "659D5C", 
   "0D670F", "3E7EC8", "332B7E", "9A059F", 
-  "F297E4", "58C9C7", "86661B", "959593", "BE3C68"
+  "F297E4", "58C9C7", "86661B", "959593"
 ];
 
 let colors = [...initialColors];
@@ -534,60 +534,6 @@ let selectedBottleIndex = null;
 let selectedPaletteHex = null;
 let bottleCount = 6;
 let bottlesData = [];
-
-// 같은 브라우저에서 페이지를 닫았다 다시 열어도 퍼즐 진행상태를 이어갑니다.
-const PUZZLE_STORAGE_KEY = 'watersort_puzzle_state_v1';
-
-function savePuzzleState() {
-  try {
-    localStorage.setItem(PUZZLE_STORAGE_KEY, JSON.stringify({
-      bottleCount,
-      bottlesData,
-      selectedBottleIndex,
-      selectedPaletteHex
-    }));
-  } catch (e) {
-    console.warn('퍼즐 상태 저장 실패:', e);
-  }
-}
-
-function loadPuzzleState() {
-  try {
-    const saved = localStorage.getItem(PUZZLE_STORAGE_KEY);
-    if (!saved) return false;
-
-    const parsed = JSON.parse(saved);
-    if (!parsed || !Array.isArray(parsed.bottlesData)) return false;
-
-    const count = Number(parsed.bottleCount);
-    if (!Number.isInteger(count) || count < 4 || count > 40) return false;
-
-    bottleCount = count;
-    bottlesData = Array.from({ length: bottleCount }, (_, i) => {
-      const bottle = parsed.bottlesData[i];
-      return Array.isArray(bottle) ? bottle.slice(0, 4) : [];
-    });
-
-    selectedBottleIndex =
-      Number.isInteger(parsed.selectedBottleIndex) &&
-      parsed.selectedBottleIndex >= 0 &&
-      parsed.selectedBottleIndex < bottleCount
-        ? parsed.selectedBottleIndex
-        : null;
-
-    selectedPaletteHex =
-      parsed.selectedPaletteHex === '?' ||
-      parsed.selectedPaletteHex === null ||
-      (typeof parsed.selectedPaletteHex === 'string' && colors.includes(parsed.selectedPaletteHex))
-        ? parsed.selectedPaletteHex
-        : null;
-
-    return true;
-  } catch (e) {
-    console.warn('저장된 퍼즐 상태를 불러오는 데 실패했습니다:', e);
-    return false;
-  }
-}
 
 function loadSavedColors() {
   const saved = localStorage.getItem('watersort_custom_colors');
@@ -618,17 +564,7 @@ function setScale(scale, btn) {
 
 function init() {
   loadSavedColors();
-
-  // 저장된 퍼즐이 있으면 그대로 이어서 하고,
-  // 없을 때만 기본 6병 상태로 시작합니다.
-  const restored = loadPuzzleState();
-  if (!restored) {
-    bottleCount = 6;
-    bottlesData = Array.from({ length: bottleCount }, () => []);
-    selectedBottleIndex = null;
-    selectedPaletteHex = null;
-  }
-
+  bottlesData = Array.from({ length: bottleCount }, () => []);
   renderPalette();
   renderBottles();
   updateInstructionText();
@@ -763,7 +699,6 @@ function selectTargetBottle(bottleIdx) {
   selectedBottleIndex = (selectedBottleIndex === bottleIdx) ? null : bottleIdx;
   renderBottles(); 
   updateInstructionText();
-  savePuzzleState();
 }
 
 function handleColorInput(hex) {
@@ -771,7 +706,6 @@ function handleColorInput(hex) {
   renderPalette();
 
   if (selectedBottleIndex === null) {
-    savePuzzleState();
     return;
   }
 
@@ -784,7 +718,6 @@ function handleColorInput(hex) {
   }
   renderBottles(); 
   renderPalette();
-  savePuzzleState();
 }
 
 function addBottle() {
@@ -794,7 +727,6 @@ function addBottle() {
     selectedBottleIndex = bottlesData.length - 1;
     renderBottles();
     updateInstructionText();
-    savePuzzleState();
   }
 }
 
@@ -806,7 +738,6 @@ function removeBottle() {
     renderBottles();
     renderPalette();
     updateInstructionText();
-    savePuzzleState();
   }
 }
 
@@ -815,7 +746,6 @@ function resetSelectedBottle() {
     bottlesData[selectedBottleIndex] = [];
     renderBottles();
     renderPalette();
-    savePuzzleState();
   }
 }
 
@@ -825,14 +755,6 @@ function resetAll() {
   selectedBottleIndex = null;
   selectedPaletteHex = null;
   document.getElementById('solution-container').style.display = 'none';
-
-  // 사용자가 '전체 초기화'를 눌렀을 때만 저장된 진행상태를 삭제합니다.
-  try {
-    localStorage.removeItem(PUZZLE_STORAGE_KEY);
-  } catch (e) {
-    console.warn('저장된 퍼즐 상태 삭제 실패:', e);
-  }
-
   renderBottles();
   renderPalette();
   updateInstructionText();
@@ -956,72 +878,82 @@ function inferMissingColors(boardState) {
     const currentState = boardState.map(f => [...f]);
     const knownColorCounts = {};
     const questionMarkPositions = [];
+    const colorResiduals = {};
 
     currentState.forEach((bottle, bIdx) => {
         bottle.forEach((color, sIdx) => {
-            if (color === '?') questionMarkPositions.push({bIdx, sIdx});
-            else knownColorCounts[color] = (knownColorCounts[color] || 0) + 1;
+            if (color === '?') {
+                questionMarkPositions.push({bIdx, sIdx});
+            } else {
+                knownColorCounts[color] = (knownColorCounts[color] || 0) + 1;
+            }
         });
     });
+
     if (questionMarkPositions.length === 0) return currentState;
 
     const usedColors = [...new Set(currentState.flat().filter(c => c !== '?'))];
-    const remaining = {};
+    
     usedColors.forEach(color => {
-        const n = 4 - (knownColorCounts[color] || 0);
-        if (n > 0) remaining[color] = n;
-        else if (n < 0) throw new Error(`모순 발생: 색상 #${color}이(가) 이미 ${knownColorCounts[color]}칸 사용되었습니다.`);
+        const remaining = 4 - (knownColorCounts[color] || 0);
+        if (remaining > 0) {
+            colorResiduals[color] = remaining;
+        } else if (remaining < 0) {
+            throw new Error(`모순 발생: 색상 #${color}이(가) 이미 ${knownColorCounts[color]}칸 사용되었습니다.`);
+        }
     });
 
-    const total = Object.values(remaining).reduce((a,b) => a+b, 0);
-    if (total !== questionMarkPositions.length) {
-        throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${total})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
+    let totalResiduals = Object.values(colorResiduals).reduce((a,b) => a+b, 0);
+    if (totalResiduals !== questionMarkPositions.length) {
+        throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${totalResiduals})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
     }
 
-    function shuffle(a) {
-        a = a.slice();
-        for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-        return a;
-    }
+    const sortedRemainingColors = Object.entries(colorResiduals).sort((a, b) => a[1] - b[1]);
+    const resolvedState = currentState.map(f => [...f]);
+    const resolvedPositions = new Set();
 
-    function canPlace(pos, color) {
-        const bottle = currentState[pos.bIdx];
-        if (pos.sIdx > 0 && bottle[pos.sIdx-1] === color) return false;
-        if (pos.sIdx + 1 < bottle.length && bottle[pos.sIdx+1] === color) return false;
-        return true;
-    }
+    sortedRemainingColors.forEach(([color, amount]) => {
+        for(let c = 0; c < amount; c++) {
+            let bestPosIdx = -1;
+            let bestScore = -100;
 
-    function choosePosition(unresolved) {
-        let best = null, bestCandidates = null;
-        for (const pos of unresolved) {
-            const candidates = shuffle(Object.keys(remaining)).filter(c => remaining[c] > 0 && canPlace(pos,c));
-            if (!candidates.length) return {pos, candidates: []};
-            if (!best || candidates.length < bestCandidates.length) { best=pos; bestCandidates=candidates; }
+            questionMarkPositions.forEach((pos, idx) => {
+                if (resolvedPositions.has(idx)) return;
+
+                let score = 0;
+                if (pos.sIdx > 0) {
+                    const colorBelow = resolvedState[pos.bIdx][pos.sIdx - 1];
+                    if (colorBelow === color) {
+                        score -= 100; 
+                    } else if (colorBelow !== '?' && colorBelow !== color) {
+                        score -= 10;
+                    }
+                } else {
+                    score += 5;
+                }
+                
+                if (pos.sIdx < 3) {
+                    const colorAbove = currentState[pos.bIdx][pos.sIdx + 1];
+                    if (colorAbove !== '?' && colorAbove !== color) score -= 40;
+                }
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestPosIdx = idx;
+                }
+            });
+
+            if (bestPosIdx !== -1) {
+                const pos = questionMarkPositions[bestPosIdx];
+                resolvedState[pos.bIdx][pos.sIdx] = color;
+                resolvedPositions.add(bestPosIdx);
+            } else {
+                throw new Error(`모순 발생: 색상 #${color}을(를) 할당할 물음표 칸을 찾을 수 없습니다.`);
+            }
         }
-        return {pos:best, candidates:bestCandidates || []};
-    }
+    });
 
-    function backtrack(unresolved) {
-        if (!unresolved.length) return true;
-        const choice = choosePosition(unresolved);
-        if (!choice.pos || !choice.candidates.length) return false;
-        for (const color of shuffle(choice.candidates)) {
-            const pos = choice.pos;
-            if (!remaining[color] || !canPlace(pos,color)) continue;
-            currentState[pos.bIdx][pos.sIdx] = color;
-            remaining[color]--;
-            const next = unresolved.filter(p => p.bIdx !== pos.bIdx || p.sIdx !== pos.sIdx);
-            if (backtrack(next)) return true;
-            remaining[color]++;
-            currentState[pos.bIdx][pos.sIdx] = '?';
-        }
-        return false;
-    }
-
-    if (!backtrack(questionMarkPositions)) {
-        throw new Error('모순 발생: 물음표에 색상을 배정하면서 같은 색이 연속되지 않도록 하는 조합을 찾을 수 없습니다.');
-    }
-    return currentState;
+    return resolvedState;
 }
 
 function solve() {
