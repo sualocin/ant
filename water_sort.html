@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="page-title">개미군단 - 과일주스 V12</title>
+<title id="page-title">개미군단 - 과일주스 V12 Solver Fix</title>
 <style>
 /* === 다크 테마 CSS 스펙 === */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -163,7 +163,7 @@ button,input{font:inherit}
 }
 .btn-del:hover { background: #6b2635; color: #fff; }
 
-/* 하단 Clear Bottle 컨테이너 */
+/* 하단 Bottle 컨테이너 */
 .bottles-container {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr)); 
@@ -391,7 +391,7 @@ button,input{font:inherit}
         </div>
       </div>
 
-      <!-- 하단 Clear Bottle 그리드 -->
+      <!-- 하단 Bottle 그리드 -->
       <div class="bottles-container" id="bottles-container"></div>
 
       <!-- 컨트롤 버튼 -->
@@ -437,7 +437,7 @@ const translations = {
     uploadBtn: "📷 게임 스크린샷 앨범에서 선택하여 자동 인식",
     uploadDesc: "스크린샷을 선택하면 빈 병 수와 색상('?' 포함)을 자동으로 추출합니다. <br>",
     instruction1: (bottleIdx) => `<b>단계 1:</b> 아래 그리드에서 <b style="color:var(--selected-bottle);">입력할 빈 병을 먼저 클릭</b>하세요.`,
-    instruction2: (bottleIdx) => `<b>단계 2:</b> 상단 팔레트에서 <b style="color:var(--accent);">채울 색상을 클릭</b>하여 <b>${bottleIdx + 1}번 Clear Bottle</b>을 채우세요. 모르는 칸은 '?'를 쓰세요.`,
+    instruction2: (bottleIdx) => `<b>단계 2:</b> 상단 팔레트에서 <b style="color:var(--accent);">채울 색상을 클릭</b>하여 <b>${bottleIdx + 1}번 Bottle</b>을 채우세요. 모르는 칸은 '?'를 쓰세요.`,
     btnAddColor: "+ 색상 추가",
     btnDelColor: "- 색상 삭제",
     btnRemove: "- 삭제",
@@ -447,7 +447,7 @@ const translations = {
     btnSolve: "배치 정답 구하기 🚀",
     tabImage: "🎨 이미지 답",
     tabText: "📄 텍스트 답",
-    bottleCountText: (count) => `Clear Bottle: ${count}개`,
+    bottleCountText: (count) => `Bottle: ${count}개`,
     eraserTitle: "선택된 병의 맨 위 칸 지우기",
     unknownTitle: "모르는 색상 (물음표) 입력",
     customPlaceholder: "HEX 코드",
@@ -455,12 +455,12 @@ const translations = {
     delAlert1: "팔레트에서 삭제할 커스텀 색상을 먼저 클릭하여 선택해 주세요.",
     delAlert2: "기본 제공 색상은 삭제할 수 없습니다.",
     delConfirm: (hex) => `#${hex} 색상을 팔레트에서 삭제하시겠습니까?`,
-    analysisDone: (count) => `✨ 이미지 분석 완료! 총 ${count}개의 Clear Bottle이 세팅되었습니다.`,
+    analysisDone: (count) => `✨ 이미지 분석 완료! 총 ${count}개의 Bottle이 세팅되었습니다.`,
     emptyBottlesWarn: "⚠️ 병이 모두 비어있습니다.",
     engineRunning: "AI 추론 엔진 기동 중... 모르는 색상을 분석하고 풀이를 계산합니다. 🧠",
     inconsistencyErr: (msg) => `<span style="color:#ff5555; font-weight:bold;">❌ AI 추론 실패:</span> 입력된 정보 간에 모순이 발견되었습니다.<br><span style="color:var(--dim);">${msg}</span>`,
     ruleFailErr: (list) => `<span style="color:#ff5555; font-weight:bold;">❌ 풀이 실패 (모순):</span> 추론된 색상 조합이 과일주스 소트 규칙(각 색상 4칸)을 충족하지 못합니다.<br>${list}`,
-    alreadySolved: "이미 모든 Clear Bottle이 정리되었습니다! 🎉",
+    alreadySolved: "이미 모든 Bottle이 정리되었습니다! 🎉",
     totalSteps: (count) => `총 ${count}단계 정답 순서:`,
     failTimeout: '<span style="color:#ff5555; font-weight:bold;">❌ 풀이 실패:</span> 이 배치는 풀 수 없거나 탐색 시간이 초과되었습니다.'
   },
@@ -470,9 +470,9 @@ const translations = {
     navNemo: "Nemo",
     navReset: "Reset",
     uploadBtn: "📷 Select Game Screenshot for Auto-Detection",
-    uploadDesc: "Select a screenshot to automatically extract the number of Clear Bottles and colors (including '?').<br>",
-    instruction1: (bottleIdx) => `<b>Step 1:</b> Click the <b style="color:var(--selected-bottle);">Clear Bottle you want to fill</b> from the grid below first.`,
-    instruction2: (bottleIdx) => `<b>Step 2:</b> Click a <b style="color:var(--accent);">color from the palette</b> above to fill <b>Clear Bottle #${bottleIdx + 1}</b>. Use '?' for unknown slots.`,
+    uploadDesc: "Select a screenshot to automatically extract the number of Bottles and colors (including '?').<br>",
+    instruction1: (bottleIdx) => `<b>Step 1:</b> Click the <b style="color:var(--selected-bottle);">Bottle you want to fill</b> from the grid below first.`,
+    instruction2: (bottleIdx) => `<b>Step 2:</b> Click a <b style="color:var(--accent);">color from the palette</b> above to fill <b>Bottle #${bottleIdx + 1}</b>. Use '?' for unknown slots.`,
     btnAddColor: "+ Add Color",
     btnDelColor: "- Delete Color",
     btnRemove: "- Delete",
@@ -482,7 +482,7 @@ const translations = {
     btnSolve: "Find Solution 🚀",
     tabImage: "🎨 Image Solution",
     tabText: "📄 Text Solution",
-    bottleCountText: (count) => `Clear Bottles: ${count}`,
+    bottleCountText: (count) => `Bottles: ${count}`,
     eraserTitle: "Clear top slot of selected bottle",
     unknownTitle: "Input unknown color (?)",
     customPlaceholder: "HEX Code",
@@ -490,12 +490,12 @@ const translations = {
     delAlert1: "Please click and select a custom color from the palette to delete.",
     delAlert2: "Default colors cannot be deleted.",
     delConfirm: (hex) => `Are you sure you want to delete #${hex} from the palette?`,
-    analysisDone: (count) => `✨ Image analysis complete! Total ${count} Clear Bottles set up.`,
-    emptyBottlesWarn: "⚠️ All Clear Bottles are empty.",
+    analysisDone: (count) => `✨ Image analysis complete! Total ${count} Bottles set up.`,
+    emptyBottlesWarn: "⚠️ All Bottles are empty.",
     engineRunning: "AI inference engine running... Analyzing unknown colors and calculating solution. 🧠",
     inconsistencyErr: (msg) => `<span style="color:#ff5555; font-weight:bold;">❌ AI Inference Failed:</span> Contradictions found in the input information.<br><span style="color:var(--dim);">${msg}</span>`,
     ruleFailErr: (list) => `<span style="color:#ff5555; font-weight:bold;">❌ Solution Failed (Contradiction):</span> The inferred color combination does not meet the fruit juice sort rule (4 slots per color).<br>${list}`,
-    alreadySolved: "All Clear Bottles are already sorted! 🎉",
+    alreadySolved: "All Bottles are already sorted! 🎉",
     totalSteps: (count) => `Total ${count} steps solution sequence:`,
     failTimeout: '<span style="color:#ff5555; font-weight:bold;">❌ Solution Failed:</span> This arrangement cannot be solved or search timed out.'
   }
@@ -524,9 +524,10 @@ function updateTexts() {
 
 // 기본 색상 목록 (HEX 기준)
 const initialColors = [
-  "A21A1A", "CF560D", "DBB06C", "659D5C", 
-  "0D670F", "3E7EC8", "332B7E", "9A059F", 
-  "F297E4", "58C9C7", "86661B", "959593"
+  "A21A1A", "CF560D", "DBB06C", "659D5C",
+  "0D670F", "3E7EC8", "332B7E", "F297E4",
+  "959593", "86661B", "9A059F", "58C9C7",
+  "BE3C68", "7058C6"
 ];
 
 let colors = [...initialColors];
@@ -534,6 +535,60 @@ let selectedBottleIndex = null;
 let selectedPaletteHex = null;
 let bottleCount = 6;
 let bottlesData = [];
+
+// 같은 브라우저에서 페이지를 닫았다 다시 열어도 퍼즐 진행상태를 이어갑니다.
+const PUZZLE_STORAGE_KEY = 'watersort_puzzle_state_v1';
+
+function savePuzzleState() {
+  try {
+    localStorage.setItem(PUZZLE_STORAGE_KEY, JSON.stringify({
+      bottleCount,
+      bottlesData,
+      selectedBottleIndex,
+      selectedPaletteHex
+    }));
+  } catch (e) {
+    console.warn('퍼즐 상태 저장 실패:', e);
+  }
+}
+
+function loadPuzzleState() {
+  try {
+    const saved = localStorage.getItem(PUZZLE_STORAGE_KEY);
+    if (!saved) return false;
+
+    const parsed = JSON.parse(saved);
+    if (!parsed || !Array.isArray(parsed.bottlesData)) return false;
+
+    const count = Number(parsed.bottleCount);
+    if (!Number.isInteger(count) || count < 4 || count > 40) return false;
+
+    bottleCount = count;
+    bottlesData = Array.from({ length: bottleCount }, (_, i) => {
+      const bottle = parsed.bottlesData[i];
+      return Array.isArray(bottle) ? bottle.slice(0, 4) : [];
+    });
+
+    selectedBottleIndex =
+      Number.isInteger(parsed.selectedBottleIndex) &&
+      parsed.selectedBottleIndex >= 0 &&
+      parsed.selectedBottleIndex < bottleCount
+        ? parsed.selectedBottleIndex
+        : null;
+
+    selectedPaletteHex =
+      parsed.selectedPaletteHex === '?' ||
+      parsed.selectedPaletteHex === null ||
+      (typeof parsed.selectedPaletteHex === 'string' && colors.includes(parsed.selectedPaletteHex))
+        ? parsed.selectedPaletteHex
+        : null;
+
+    return true;
+  } catch (e) {
+    console.warn('저장된 퍼즐 상태를 불러오는 데 실패했습니다:', e);
+    return false;
+  }
+}
 
 function loadSavedColors() {
   const saved = localStorage.getItem('watersort_custom_colors');
@@ -564,7 +619,17 @@ function setScale(scale, btn) {
 
 function init() {
   loadSavedColors();
-  bottlesData = Array.from({ length: bottleCount }, () => []);
+
+  // 저장된 퍼즐이 있으면 그대로 이어서 하고,
+  // 없을 때만 기본 6병 상태로 시작합니다.
+  const restored = loadPuzzleState();
+  if (!restored) {
+    bottleCount = 6;
+    bottlesData = Array.from({ length: bottleCount }, () => []);
+    selectedBottleIndex = null;
+    selectedPaletteHex = null;
+  }
+
   renderPalette();
   renderBottles();
   updateInstructionText();
@@ -699,6 +764,7 @@ function selectTargetBottle(bottleIdx) {
   selectedBottleIndex = (selectedBottleIndex === bottleIdx) ? null : bottleIdx;
   renderBottles(); 
   updateInstructionText();
+  savePuzzleState();
 }
 
 function handleColorInput(hex) {
@@ -706,6 +772,7 @@ function handleColorInput(hex) {
   renderPalette();
 
   if (selectedBottleIndex === null) {
+    savePuzzleState();
     return;
   }
 
@@ -718,6 +785,7 @@ function handleColorInput(hex) {
   }
   renderBottles(); 
   renderPalette();
+  savePuzzleState();
 }
 
 function addBottle() {
@@ -727,6 +795,7 @@ function addBottle() {
     selectedBottleIndex = bottlesData.length - 1;
     renderBottles();
     updateInstructionText();
+    savePuzzleState();
   }
 }
 
@@ -738,6 +807,7 @@ function removeBottle() {
     renderBottles();
     renderPalette();
     updateInstructionText();
+    savePuzzleState();
   }
 }
 
@@ -746,6 +816,7 @@ function resetSelectedBottle() {
     bottlesData[selectedBottleIndex] = [];
     renderBottles();
     renderPalette();
+    savePuzzleState();
   }
 }
 
@@ -755,6 +826,14 @@ function resetAll() {
   selectedBottleIndex = null;
   selectedPaletteHex = null;
   document.getElementById('solution-container').style.display = 'none';
+
+  // 사용자가 '전체 초기화'를 눌렀을 때만 저장된 진행상태를 삭제합니다.
+  try {
+    localStorage.removeItem(PUZZLE_STORAGE_KEY);
+  } catch (e) {
+    console.warn('저장된 퍼즐 상태 삭제 실패:', e);
+  }
+
   renderBottles();
   renderPalette();
   updateInstructionText();
@@ -861,7 +940,7 @@ async function processUploadedImage(event) {
 
     const hiddenCount = bottlesData.flat().filter(c => c === '?').length;
     const emptyCount = bottlesData.filter(b => b.length === 0).length;
-    let msg = `✨ 이미지 분석 완료! 총 ${bottleCount}개의 Clear Bottle이 세팅되었습니다.`;
+    let msg = `✨ 이미지 분석 완료! 총 ${bottleCount}개의 Bottle이 세팅되었습니다.`;
     if (hiddenCount > 0) msg += ` 물음표 ${hiddenCount}칸도 인식했습니다.`;
     if (emptyCount > 0) msg += ` 빈 병 ${emptyCount}개도 반영했습니다.`;
     alert(msg);
@@ -878,82 +957,72 @@ function inferMissingColors(boardState) {
     const currentState = boardState.map(f => [...f]);
     const knownColorCounts = {};
     const questionMarkPositions = [];
-    const colorResiduals = {};
 
     currentState.forEach((bottle, bIdx) => {
         bottle.forEach((color, sIdx) => {
-            if (color === '?') {
-                questionMarkPositions.push({bIdx, sIdx});
-            } else {
-                knownColorCounts[color] = (knownColorCounts[color] || 0) + 1;
-            }
+            if (color === '?') questionMarkPositions.push({bIdx, sIdx});
+            else knownColorCounts[color] = (knownColorCounts[color] || 0) + 1;
         });
     });
-
     if (questionMarkPositions.length === 0) return currentState;
 
     const usedColors = [...new Set(currentState.flat().filter(c => c !== '?'))];
-    
+    const remaining = {};
     usedColors.forEach(color => {
-        const remaining = 4 - (knownColorCounts[color] || 0);
-        if (remaining > 0) {
-            colorResiduals[color] = remaining;
-        } else if (remaining < 0) {
-            throw new Error(`모순 발생: 색상 #${color}이(가) 이미 ${knownColorCounts[color]}칸 사용되었습니다.`);
-        }
+        const n = 4 - (knownColorCounts[color] || 0);
+        if (n > 0) remaining[color] = n;
+        else if (n < 0) throw new Error(`모순 발생: 색상 #${color}이(가) 이미 ${knownColorCounts[color]}칸 사용되었습니다.`);
     });
 
-    let totalResiduals = Object.values(colorResiduals).reduce((a,b) => a+b, 0);
-    if (totalResiduals !== questionMarkPositions.length) {
-        throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${totalResiduals})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
+    const total = Object.values(remaining).reduce((a,b) => a+b, 0);
+    if (total !== questionMarkPositions.length) {
+        throw new Error(`모순 발생: 추론에 필요한 남은 색상 칸 수(${total})와 물음표 개수(${questionMarkPositions.length})가 일치하지 않습니다.`);
     }
 
-    const sortedRemainingColors = Object.entries(colorResiduals).sort((a, b) => a[1] - b[1]);
-    const resolvedState = currentState.map(f => [...f]);
-    const resolvedPositions = new Set();
+    function shuffle(a) {
+        a = a.slice();
+        for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+        return a;
+    }
 
-    sortedRemainingColors.forEach(([color, amount]) => {
-        for(let c = 0; c < amount; c++) {
-            let bestPosIdx = -1;
-            let bestScore = -100;
+    function canPlace(pos, color) {
+        const bottle = currentState[pos.bIdx];
+        if (pos.sIdx > 0 && bottle[pos.sIdx-1] === color) return false;
+        if (pos.sIdx + 1 < bottle.length && bottle[pos.sIdx+1] === color) return false;
+        return true;
+    }
 
-            questionMarkPositions.forEach((pos, idx) => {
-                if (resolvedPositions.has(idx)) return;
-
-                let score = 0;
-                if (pos.sIdx > 0) {
-                    const colorBelow = resolvedState[pos.bIdx][pos.sIdx - 1];
-                    if (colorBelow === color) {
-                        score -= 100; 
-                    } else if (colorBelow !== '?' && colorBelow !== color) {
-                        score -= 10;
-                    }
-                } else {
-                    score += 5;
-                }
-                
-                if (pos.sIdx < 3) {
-                    const colorAbove = currentState[pos.bIdx][pos.sIdx + 1];
-                    if (colorAbove !== '?' && colorAbove !== color) score -= 40;
-                }
-
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestPosIdx = idx;
-                }
-            });
-
-            if (bestPosIdx !== -1) {
-                const pos = questionMarkPositions[bestPosIdx];
-                resolvedState[pos.bIdx][pos.sIdx] = color;
-                resolvedPositions.add(bestPosIdx);
-            } else {
-                throw new Error(`모순 발생: 색상 #${color}을(를) 할당할 물음표 칸을 찾을 수 없습니다.`);
-            }
+    function choosePosition(unresolved) {
+        let best = null, bestCandidates = null;
+        for (const pos of unresolved) {
+            const candidates = shuffle(Object.keys(remaining)).filter(c => remaining[c] > 0 && canPlace(pos,c));
+            if (!candidates.length) return {pos, candidates: []};
+            if (!best || candidates.length < bestCandidates.length) { best=pos; bestCandidates=candidates; }
         }
-    });
+        return {pos:best, candidates:bestCandidates || []};
+    }
 
-    return resolvedState;
+    function backtrack(unresolved) {
+        if (!unresolved.length) return true;
+        const choice = choosePosition(unresolved);
+        if (!choice.pos || !choice.candidates.length) return false;
+        for (const color of shuffle(choice.candidates)) {
+            const pos = choice.pos;
+            if (!remaining[color] || !canPlace(pos,color)) continue;
+            currentState[pos.bIdx][pos.sIdx] = color;
+            remaining[color]--;
+            const next = unresolved.filter(p => p.bIdx !== pos.bIdx || p.sIdx !== pos.sIdx);
+            if (backtrack(next)) return true;
+            remaining[color]++;
+            currentState[pos.bIdx][pos.sIdx] = '?';
+        }
+        return false;
+    }
+
+    if (!backtrack(questionMarkPositions)) {
+        throw new Error('모순 발생: 물음표에 색상을 배정하면서 같은 색이 연속되지 않도록 하는 조합을 찾을 수 없습니다.');
+    }
+    return currentState;
 }
 
 function solve() {
@@ -1005,84 +1074,159 @@ function solve() {
     return;
   }
 
-  function serialize(state) {
-    return state.map(f => f.join(',')).sort().join('|');
+  // === 고속 Water Sort Solver ===
+  // 기존 BFS는 병 수가 많거나 빈 병이 3개인 어려운 배치에서
+  // 상태 공간이 급격히 커져 7초 제한에 걸릴 수 있습니다.
+  // 색상 이름은 퍼즐의 규칙상 서로 대칭이므로, 탐색 중에는
+  // "등장 순서 기준 색상 정규화"를 사용해 동일한 구조의 상태를 합칩니다.
+  // 병의 순서는 유지하므로 반환되는 from/to 번호는 실제 병 번호와 일치합니다.
+
+  function canonicalizeColors(state) {
+    const colorMap = new Map();
+    let nextColor = 0;
+    return state.map(bottle => bottle.map(color => {
+      if (!colorMap.has(color)) colorMap.set(color, nextColor++);
+      return colorMap.get(color);
+    }));
   }
 
-  function isSolved(state) {
-    return state.every(f => f.length === 0 || (f.length === 4 && f.every(c => c === f[0])));
+  function stateKey(state) {
+    return state.map(bottle => bottle.join(',')).join('|');
   }
 
-  function getMoveableAmount(state, fromIdx, toIdx) {
-    const src = state[fromIdx];
-    const dest = state[toIdx];
-
-    if (fromIdx === toIdx || src.length === 0 || dest.length === 4) return 0;
-    const color = src[src.length - 1];
-
-    if (dest.length === 0) {
-      if (src.every(c => c === color) && src.length === 4) return 0;
-      let count = 0;
-      for(let i = src.length - 1; i >= 0; i--) {
-        if(src[i] === color) count++; else break;
+  function heuristic(state, colorCount) {
+    // 한 번의 붓기로 줄일 수 있는 "색상 블록(run)"은 최대 1개이므로
+    // runs - 색상수는 풀이에 필요한 붓기 횟수의 하한으로 사용할 수 있습니다.
+    let runs = 0;
+    for (const bottle of state) {
+      for (let i = 0; i < bottle.length; i++) {
+        if (i === 0 || bottle[i] !== bottle[i - 1]) runs++;
       }
-      return count;
     }
-
-    if (dest[dest.length - 1] !== color) return 0;
-
-    let srcContCount = 0;
-    for(let i = src.length - 1; i >= 0; i--) {
-      if(src[i] === color) srcContCount++; else break;
-    }
-    return Math.min(srcContCount, 4 - dest.length);
+    return Math.max(0, runs - colorCount);
   }
 
-  function makeMove(state, fromIdx, toIdx, amount) {
-    const newState = state.map(f => [...f]);
-    const src = newState[fromIdx];
-    const dest = newState[toIdx];
-    for(let i = 0; i < amount; i++) {
-      dest.push(src.pop());
-    }
-    return newState;
-  }
+  function solveWithFastDFS(startState, timeLimitMs = 15000) {
+    const colorCount = new Set(startState.flat()).size;
+    const start = canonicalizeColors(startState);
+    const path = [];
+    const visited = new Map();
+    const startTime = performance.now();
+    let nodeCount = 0;
+    let timedOut = false;
 
-  let queue = [{ state: resolvedStateData, path: [] }];
-  let visited = new Set([serialize(resolvedStateData)]);
-  let foundPath = null;
-  const startTime = performance.now();
-
-  while (queue.length > 0) {
-    let { state, path } = queue.shift();
-
-    if (isSolved(state)) {
-      foundPath = path;
-      break;
+    function isSolvedFast(state) {
+      return state.every(bottle =>
+        bottle.length === 0 || (bottle.length === 4 && bottle.every(c => c === bottle[0]))
+      );
     }
 
-    if ((performance.now() - startTime) > 7000) break; 
+    function getMoves(state, lastMove) {
+      const moves = [];
 
-    for (let i = 0; i < state.length; i++) {
-      if (state[i].length === 0) continue;
-      for (let j = 0; j < state.length; j++) {
-        const amount = getMoveableAmount(state, i, j);
-        if (amount > 0) {
-          const nextState = makeMove(state, i, j, amount);
-          const key = serialize(nextState);
+      for (let from = 0; from < state.length; from++) {
+        const src = state[from];
+        if (src.length === 0) continue;
 
-          if (!visited.has(key)) {
-            visited.add(key);
-            queue.push({
-              state: nextState,
-              path: [...path, { from: i + 1, to: j + 1, color: state[i][state[i].length - 1], amount }]
-            });
+        const color = src[src.length - 1];
+        let amount = 1;
+        while (amount < src.length && src[src.length - 1 - amount] === color) amount++;
+
+        for (let to = 0; to < state.length; to++) {
+          if (from === to) continue;
+          const dest = state[to];
+          if (dest.length >= 4) continue;
+          if (dest.length > 0 && dest[dest.length - 1] !== color) continue;
+
+          // 바로 직전 이동의 완전한 역이동은 제거합니다.
+          if (lastMove && from === lastMove.to && to === lastMove.from) continue;
+
+          let pourAmount;
+          let priority;
+          if (dest.length === 0) {
+            // 같은 색 한 덩어리를 빈 병으로 옮기는 것은 구조를 전혀
+            // 개선하지 않으므로 제외합니다. 혼합 병을 비우는 이동은 허용합니다.
+            if (amount === src.length) continue;
+            pourAmount = amount;
+            priority = 1;
+          } else {
+            pourAmount = Math.min(amount, 4 - dest.length);
+            priority = 0; // 같은 색 위로 붓는 이동을 우선
           }
+
+          if (pourAmount <= 0) continue;
+
+          const next = state.map(b => b.slice());
+          for (let n = 0; n < pourAmount; n++) next[to].push(next[from].pop());
+
+          const canonicalNext = canonicalizeColors(next);
+          const key = stateKey(canonicalNext);
+          const h = heuristic(canonicalNext, colorCount);
+
+          moves.push({ from, to, amount: pourAmount, priority, h, state: canonicalNext, key });
         }
       }
+
+      // 같은 색으로 합치는 이동 + 휴리스틱상 유리한 상태를 먼저 탐색합니다.
+      moves.sort((a, b) => a.priority - b.priority || a.h - b.h);
+      return moves;
     }
+
+    function dfs(state, depth, lastMove) {
+      nodeCount++;
+      if ((nodeCount & 2047) === 0 && performance.now() - startTime > timeLimitMs) {
+        timedOut = true;
+        return false;
+      }
+
+      if (isSolvedFast(state)) return true;
+
+      const key = stateKey(state);
+      const previousDepth = visited.get(key);
+      if (previousDepth !== undefined && previousDepth <= depth) return false;
+      visited.set(key, depth);
+
+      const moves = getMoves(state, lastMove);
+      for (const move of moves) {
+        if (timedOut) return false;
+
+        path.push({
+          from: move.from + 1,
+          to: move.to + 1,
+          color: state[move.from][state[move.from].length - 1],
+          amount: move.amount
+        });
+
+        if (dfs(move.state, depth + 1, move)) return true;
+        path.pop();
+      }
+      return false;
+    }
+
+    const found = dfs(start, 0, null);
+    return {
+      path: found ? path.slice() : null,
+      timedOut,
+      nodeCount,
+      elapsedMs: performance.now() - startTime
+    };
   }
 
+  const searchResult = solveWithFastDFS(resolvedStateData, 15000);
+  const foundPath = searchResult.path;
+
+  // 탐색 중에는 색상 이름을 정규화했기 때문에, 결과 표시 직전에
+  // 실제 퍼즐의 HEX 색상으로 다시 매핑합니다.
+  if (foundPath) {
+    const replayState = resolvedStateData.map(b => [...b]);
+    foundPath.forEach(step => {
+      const source = replayState[step.from - 1];
+      step.color = source[source.length - 1];
+      for (let n = 0; n < step.amount; n++) {
+        replayState[step.to - 1].push(source.pop());
+      }
+    });
+  }
   if (foundPath) {
     if (foundPath.length === 0) {
       outputText.innerHTML = `<b style="color:var(--accent);">${t.alreadySolved}</b>`;
