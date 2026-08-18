@@ -335,6 +335,83 @@ button,input{font:inherit}
 @media (max-width: 768px) {
     .solution-content-area { padding: 10px; }
 }
+
+/* === 풀이 이미지 단계별 애니메이션 컨트롤 === */
+#solution-animation-controls {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    padding:14px 10px 18px;
+    background:#12261e;
+    border-top:1px solid #214032;
+}
+.solution-nav-btn {
+    min-width:100px;
+    padding:10px 18px;
+    border-radius:12px;
+    border:1px solid #6cb885;
+    background:linear-gradient(180deg,#3d7e56 0%,#1f482f 100%);
+    color:#ffe9a9;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .15s ease,filter .15s ease;
+}
+.solution-nav-btn:hover:not(:disabled){filter:brightness(1.15);transform:translateY(-1px)}
+.solution-nav-btn:active:not(:disabled){transform:scale(.96)}
+.solution-nav-btn:disabled{opacity:.35;cursor:not-allowed}
+#solution-step-indicator{min-width:76px;text-align:center;color:#f3ca65;font-size:16px;font-weight:800}
+@media(max-width:480px){
+  #solution-animation-controls{gap:8px}
+  .solution-nav-btn{min-width:82px;padding:9px 10px;font-size:14px}
+  #solution-step-indicator{min-width:60px;font-size:14px}
+}
+
+.solution-auto-btn.solution-auto-active {
+    background: linear-gradient(180deg, #9a4b4b 0%, #5b2626 100%);
+    border-color: #e07a7a;
+    color: #fff;
+}
+
+.solution-speed-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #f3ca65;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.solution-speed-wrap select {
+    min-width: 78px;
+    padding: 9px 8px;
+    border-radius: 10px;
+    border: 1px solid #6cb885;
+    background: #10271c;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    outline: none;
+}
+
+.solution-speed-wrap select:focus {
+    border-color: #f3ca65;
+}
+
+@media (max-width: 480px) {
+    .solution-speed-wrap {
+        gap: 4px;
+        font-size: 12px;
+    }
+
+    .solution-speed-wrap select {
+        min-width: 70px;
+        padding: 8px 5px;
+        font-size: 12px;
+    }
+}
 </style>
 </head>
 <body>
@@ -1255,162 +1332,524 @@ function solve() {
 }
 
 function drawVisualSolutionImage(path, inferredBoardState) {
-    const canvas = document.getElementById('solution-canvas');
-    const ctx = canvas.getContext('2d');
-
     const initialState = inferredBoardState.map(f => [...f]);
-    const numBottles = inferredBoardState.length;
-    const stepsToDisplay = [initialState];
+    const states = [initialState];
+    let currentState = initialState.map(f => [...f]);
 
-    let currentState = initialState;
     path.forEach(move => {
-        const newState = currentState.map(f => [...f]);
-        const src = newState[move.from - 1];
-        const dest = newState[move.to - 1];
-        for(let i = 0; i < move.amount; i++) {
-            dest.push(src.pop());
-        }
-        stepsToDisplay.push(newState);
-        currentState = newState;
+        const nextState = currentState.map(f => [...f]);
+        const src = nextState[move.from - 1];
+        const dest = nextState[move.to - 1];
+        for (let i = 0; i < move.amount; i++) dest.push(src.pop());
+        states.push(nextState);
+        currentState = nextState;
     });
 
+    solutionAnimation = {
+        path,
+        states,
+        currentStep: 0,
+        animating: false,
+    autoPlaying: false,
+    autoTimer: null,
+    autoInterval: 500,
+        direction: 'forward',
+        unitIndex: 0,
+        unitCount: 0,
+        fromBottle: null,
+        toBottle: null,
+        color: null,
+        startTime: 0,
+        duration: 420,
+        raf: null
+    };
+
+    createSolutionControls();
+    renderSolutionFrame();
+}
+
+let solutionAnimation = {
+    path: [], states: [], currentStep: 0, animating: false,
+    autoPlaying: false,
+    autoTimer: null,
+    autoInterval: 500,
+    direction: 'forward', unitIndex: 0, unitCount: 0,
+    fromBottle: null, toBottle: null, color: null,
+    startTime: 0, duration: 500, raf: null
+};
+
+function createSolutionControls() {
+    const panel = document.getElementById('solution-output-image');
+    let controls = document.getElementById('solution-animation-controls');
+
+    if (!controls) {
+        controls = document.createElement('div');
+        controls.id = 'solution-animation-controls';
+        controls.innerHTML = `
+            <button type="button" id="solution-prev-btn" class="solution-nav-btn" onclick="solutionPreviousStep()">◀ 이전</button>
+            <div id="solution-step-indicator">0 / 0</div>
+            <button type="button" id="solution-next-btn" class="solution-nav-btn" onclick="solutionNextStep()">다음 ▶</button>
+            <button type="button" id="solution-auto-btn" class="solution-nav-btn solution-auto-btn" onclick="toggleSolutionAuto()">▶ 자동</button>
+            <div class="solution-speed-wrap">
+                <label for="solution-speed">속도</label>
+                <select id="solution-speed" onchange="changeSolutionSpeed(this.value)">
+                    <option value="0.25">0.25초</option>
+                    <option value="0.5" selected>0.5초</option>
+                    <option value="0.75">0.75초</option>
+                    <option value="1">1초</option>
+                    <option value="1.25">1.25초</option>
+                </select>
+            </div>
+        `;
+        panel.appendChild(controls);
+    }
+    updateSolutionControls();
+}
+
+function updateSolutionControls() {
+    const total = solutionAnimation.path.length;
+    const current = solutionAnimation.currentStep;
+    const prev = document.getElementById('solution-prev-btn');
+    const next = document.getElementById('solution-next-btn');
+    const auto = document.getElementById('solution-auto-btn');
+    const indicator = document.getElementById('solution-step-indicator');
+    if (!prev || !next || !indicator) return;
+
+    const isKo = currentLang === 'ko';
+    prev.textContent = isKo ? '◀ 이전' : '◀ Previous';
+    next.textContent = isKo ? '다음 ▶' : 'Next ▶';
+    indicator.textContent = `${current} / ${total}`;
+    prev.disabled =
+        solutionAnimation.animating ||
+        solutionAnimation.autoPlaying ||
+        current <= 0;
+
+    next.disabled =
+        solutionAnimation.animating ||
+        solutionAnimation.autoPlaying ||
+        current >= total;
+
+    if (auto) {
+        auto.textContent =
+            solutionAnimation.autoPlaying ? '■ 멈춤' : '▶ 자동';
+        auto.disabled =
+            current >= total && !solutionAnimation.autoPlaying;
+        auto.classList.toggle(
+            'solution-auto-active',
+            solutionAnimation.autoPlaying
+        );
+    }
+}
+
+function solutionNextStep() {
+    if (solutionAnimation.animating) return;
+    if (solutionAnimation.currentStep >= solutionAnimation.path.length) return;
+
+    const step = solutionAnimation.path[solutionAnimation.currentStep];
+    startSolutionAnimation('forward', solutionAnimation.currentStep, step);
+}
+
+function solutionPreviousStep() {
+    if (solutionAnimation.animating) return;
+    if (solutionAnimation.currentStep <= 0) return;
+
+    const stepIndex = solutionAnimation.currentStep - 1;
+    const step = solutionAnimation.path[stepIndex];
+    startSolutionAnimation('backward', stepIndex, step);
+}
+
+function startSolutionAnimation(direction, stepIndex, move) {
+    cancelSolutionAnimation();
+
+    const amount = Math.max(1, Number(move.amount) || 1);
+    solutionAnimation.animating = true;
+    solutionAnimation.direction = direction;
+    solutionAnimation.unitIndex = 0;
+    solutionAnimation.unitCount = amount;
+    solutionAnimation.fromBottle = (direction === 'forward' ? move.from : move.to) - 1;
+    solutionAnimation.toBottle = (direction === 'forward' ? move.to : move.from) - 1;
+    solutionAnimation.color = move.color;
+    solutionAnimation.currentMoveStep = stepIndex;
+    solutionAnimation.startTime = performance.now();
+
+    updateSolutionControls();
+    solutionAnimation.raf = requestAnimationFrame(animateSolutionMove);
+}
+
+function cancelSolutionAnimation() {
+    if (solutionAnimation.raf) {
+        cancelAnimationFrame(solutionAnimation.raf);
+        solutionAnimation.raf = null;
+    }
+    solutionAnimation.animating = false;
+}
+
+
+function changeSolutionSpeed(value) {
+    const seconds = parseFloat(value);
+
+    if (!Number.isFinite(seconds)) return;
+
+    solutionAnimation.duration = seconds * 1000;
+
+    /*
+     * 자동 재생 중에도 다음 이동부터 바로 적용됩니다.
+     * 현재 진행 중인 애니메이션은 현재 속도로 마무리됩니다.
+     */
+    updateSolutionControls();
+}
+
+function toggleSolutionAuto() {
+    if (solutionAnimation.autoPlaying) {
+        stopSolutionAuto();
+    } else {
+        startSolutionAuto();
+    }
+}
+
+function startSolutionAuto() {
+    if (solutionAnimation.autoPlaying) return;
+
+    if (solutionAnimation.currentStep >= solutionAnimation.path.length) {
+        solutionAnimation.currentStep = 0;
+        renderSolutionFrame();
+    }
+
+    solutionAnimation.autoPlaying = true;
+    updateSolutionControls();
+    runSolutionAutoStep();
+}
+
+function stopSolutionAuto() {
+    solutionAnimation.autoPlaying = false;
+
+    if (solutionAnimation.autoTimer) {
+        clearTimeout(solutionAnimation.autoTimer);
+        solutionAnimation.autoTimer = null;
+    }
+
+    if (solutionAnimation.animating) {
+        cancelSolutionAnimation();
+        renderSolutionFrame();
+    }
+
+    updateSolutionControls();
+}
+
+function runSolutionAutoStep() {
+    if (!solutionAnimation.autoPlaying || solutionAnimation.animating) return;
+
+    if (solutionAnimation.currentStep >= solutionAnimation.path.length) {
+        stopSolutionAuto();
+        return;
+    }
+
+    startSolutionAnimation(
+        'forward',
+        solutionAnimation.currentStep,
+        solutionAnimation.path[solutionAnimation.currentStep]
+    );
+}
+
+function animateSolutionMove(timestamp) {
+    if (!solutionAnimation.animating) return;
+
+    const elapsed = timestamp - solutionAnimation.startTime;
+    const progress = Math.min(elapsed / solutionAnimation.duration, 1);
+    const eased = easeInOutCubic(progress);
+
+    renderSolutionFrame(solutionAnimation.currentStep, {
+        animating: true,
+        progress: eased,
+        direction: solutionAnimation.direction,
+        stepIndex: solutionAnimation.currentMoveStep,
+        unitIndex: solutionAnimation.unitIndex
+    });
+
+    if (progress < 1) {
+        solutionAnimation.raf = requestAnimationFrame(animateSolutionMove);
+        return;
+    }
+
+    if (solutionAnimation.unitIndex + 1 < solutionAnimation.unitCount) {
+        solutionAnimation.unitIndex++;
+        solutionAnimation.startTime = performance.now();
+        solutionAnimation.raf = requestAnimationFrame(animateSolutionMove);
+        return;
+    }
+
+    if (solutionAnimation.direction === 'forward') {
+        solutionAnimation.currentStep = solutionAnimation.currentMoveStep + 1;
+    } else {
+        solutionAnimation.currentStep = solutionAnimation.currentMoveStep;
+    }
+
+    solutionAnimation.animating = false;
+    solutionAnimation.raf = null;
+    renderSolutionFrame();
+    updateSolutionControls();
+
+    if (
+        solutionAnimation.autoPlaying &&
+        solutionAnimation.currentStep < solutionAnimation.path.length
+    ) {
+        solutionAnimation.autoTimer = setTimeout(
+            runSolutionAutoStep,
+            solutionAnimation.autoInterval
+        );
+    } else if (
+        solutionAnimation.autoPlaying &&
+        solutionAnimation.currentStep >= solutionAnimation.path.length
+    ) {
+        stopSolutionAuto();
+    }
+}
+
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function getIntermediateState(stepIndex, direction, unitIndex) {
+    const move = solutionAnimation.path[stepIndex];
+    const baseIndex = direction === 'forward' ? stepIndex : stepIndex + 1;
+    const state = solutionAnimation.states[baseIndex].map(b => [...b]);
+    const from = (direction === 'forward' ? move.from : move.to) - 1;
+    const to = (direction === 'forward' ? move.to : move.from) - 1;
+
+    for (let i = 0; i < unitIndex; i++) {
+        if (state[from].length > 0) {
+            state[to].push(state[from].pop());
+        }
+    }
+    return state;
+}
+
+function renderSolutionFrame(stepIndex = solutionAnimation.currentStep, animation = null) {
+    const canvas = document.getElementById('solution-canvas');
+    if (!canvas || !solutionAnimation.states.length) return;
+
+    const ctx = canvas.getContext('2d');
+    const numBottles = solutionAnimation.states[0].length;
     const isMobile = window.innerWidth <= 768;
 
-    let UNIT = isMobile ? 1.4 : 0.85;
+    /*
+     * 병은 최대 16개까지 반드시 한 줄에 표시합니다.
+     * 현재 화면에서 16개가 들어갈 수 있는 최대 크기를 기준으로
+     * 병의 폭과 간격을 자동 계산합니다.
+     */
+    const screenWidth = Math.max(
+        320,
+        Math.min(window.innerWidth - 16, 1600)
+    );
 
-    const BOTTLE_WIDTH = 32 * UNIT;
-    const BOTTLE_GAP_X = 10 * UNIT;
-    const INNER_PADDING_X = 20 * UNIT;
+    const INNER_PADDING_X = isMobile ? 8 : 18;
+
+    // 병 사이 간격을 병 폭의 약 25%로 유지
+    const GAP_RATIO = isMobile ? 0.20 : 0.25;
+
+    const usableWidth =
+        screenWidth - INNER_PADDING_X * 2;
+
+    let BOTTLE_WIDTH = Math.floor(
+        usableWidth /
+        (
+            numBottles +
+            Math.max(0, numBottles - 1) * GAP_RATIO
+        )
+    );
+
+    // 병 개수가 적으면 크게, 16개면 화면에 딱 맞게
+    BOTTLE_WIDTH = Math.max(
+        24,
+        Math.min(BOTTLE_WIDTH, isMobile ? 58 : 78)
+    );
+
+    const BOTTLE_GAP_X = Math.max(
+        4,
+        Math.round(BOTTLE_WIDTH * GAP_RATIO)
+    );
+
+    // 기존 병의 세로 비율 유지
+    const UNIT = Math.max(
+        0.75,
+        Math.min(2.0, BOTTLE_WIDTH / 32)
+    );
 
     const BOTTLE_HEIGHT = 100 * UNIT;
     const SEGMENT_HEIGHT = BOTTLE_HEIGHT / 4;
-    const STEP_PADDING_TOP = 18 * UNIT;
-    const STEP_PADDING_BOTTOM = 18 * UNIT;
-    const LABEL_AREA_HEIGHT = 32 * UNIT;
-    const FINGER_ICON_AREA_HEIGHT = 32 * UNIT;
-    const BOTTLE_NUM_LABEL_HEIGHT = 22 * UNIT;
+    const TOP_AREA = 54 * UNIT;
+    const BOTTOM_AREA = 30 * UNIT;
 
-    const ONE_STEP_HEIGHT = STEP_PADDING_TOP + LABEL_AREA_HEIGHT + FINGER_ICON_AREA_HEIGHT + BOTTLE_HEIGHT + BOTTLE_NUM_LABEL_HEIGHT + STEP_PADDING_BOTTOM;
-    
-    const totalBottlesWidth = (numBottles * BOTTLE_WIDTH) + ((numBottles - 1) * BOTTLE_GAP_X);
-    
-    const width = isMobile ? totalBottlesWidth + (INNER_PADDING_X * 2) : Math.max(750, totalBottlesWidth + (INNER_PADDING_X * 2));
-    const height = stepsToDisplay.length * ONE_STEP_HEIGHT;
-    
-    canvas.width = width;
-    canvas.height = height;
+    const totalBottlesWidth =
+        numBottles * BOTTLE_WIDTH +
+        Math.max(0, numBottles - 1) * BOTTLE_GAP_X;
+
+    const width = Math.max(
+        320,
+        totalBottlesWidth + INNER_PADDING_X * 2
+    );
+    const height = TOP_AREA + BOTTLE_HEIGHT + BOTTOM_AREA;
+
+    canvas.width = Math.ceil(width);
+    canvas.height = Math.ceil(height);
 
     ctx.fillStyle = '#091510';
     ctx.fillRect(0, 0, width, height);
     ctx.textBaseline = 'top';
 
-    stepsToDisplay.forEach((boardState, stepIdx) => {
-        const stepY = stepIdx * ONE_STEP_HEIGHT;
-        
-        ctx.fillStyle = '#f3ca65';
-        ctx.font = `700 ${18 * UNIT}px "Segoe UI", Arial`;
-        ctx.textAlign = 'left';
-        ctx.fillText(`#${stepIdx + 1}`, INNER_PADDING_X, stepY + STEP_PADDING_TOP);
+    const total = solutionAnimation.path.length;
+    ctx.fillStyle = '#f3ca65';
+    ctx.font = `700 ${18 * UNIT}px "Segoe UI", Arial`;
+    ctx.textAlign = 'left';
+    ctx.fillText(`#${solutionAnimation.currentStep} / ${total}`, INNER_PADDING_X, 12 * UNIT);
 
-        if(stepIdx > 0) {
-            ctx.strokeStyle = '#214032';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(10, stepY);
-            ctx.lineTo(width - 10, stepY);
-            ctx.stroke();
-        }
+    let board;
+    if (animation) {
+        board = getIntermediateState(animation.stepIndex, animation.direction, animation.unitIndex);
+    } else {
+        board = solutionAnimation.states[stepIndex].map(b => [...b]);
+    }
 
-        let currentMove = (stepIdx > 0 && stepIdx <= path.length) ? path[stepIdx - 1] : null;
-        const fingerIconY = stepY + STEP_PADDING_TOP + LABEL_AREA_HEIGHT;
-        
-        const startX = (width - totalBottlesWidth) / 2;
+    const startX = (width - totalBottlesWidth) / 2;
+    const bottleY = TOP_AREA;
 
-        for (let bottleIdx = 0; bottleIdx < numBottles; bottleIdx++) {
-            const bottle = boardState[bottleIdx];
-            const bottleX = startX + (bottleIdx * (BOTTLE_WIDTH + BOTTLE_GAP_X));
-            const bottleY = fingerIconY + FINGER_ICON_AREA_HEIGHT;
+    for (let bottleIdx = 0; bottleIdx < numBottles; bottleIdx++) {
+        const x = startX + bottleIdx * (BOTTLE_WIDTH + BOTTLE_GAP_X);
+        drawSolutionBottle(ctx, board[bottleIdx], x, bottleY, BOTTLE_WIDTH, BOTTLE_HEIGHT, UNIT, bottleIdx);
+    }
 
-            ctx.strokeStyle = '#6cb885';
-            ctx.lineWidth = 2 * UNIT; 
-            const radius = 7 * UNIT;
-            
-            ctx.beginPath();
-            ctx.moveTo(bottleX, bottleY);
-            ctx.lineTo(bottleX + BOTTLE_WIDTH, bottleY);
-            ctx.lineTo(bottleX + BOTTLE_WIDTH, bottleY + BOTTLE_HEIGHT - radius);
-            ctx.quadraticCurveTo(bottleX + BOTTLE_WIDTH, bottleY + BOTTLE_HEIGHT, bottleX + BOTTLE_WIDTH - radius, bottleY + BOTTLE_HEIGHT);
-            ctx.lineTo(bottleX + radius, bottleY + BOTTLE_HEIGHT);
-            ctx.quadraticCurveTo(bottleX, bottleY + BOTTLE_HEIGHT, bottleX, bottleY + BOTTLE_HEIGHT - radius);
-            ctx.closePath();
-            
-            ctx.fillStyle = 'rgba(10, 23, 17, 0.8)';
-            ctx.fill();
-            ctx.stroke();
+    if (animation && animation.animating) {
+        drawMovingColor(ctx, board, animation, startX, bottleY, BOTTLE_WIDTH, BOTTLE_GAP_X, BOTTLE_HEIGHT, SEGMENT_HEIGHT, UNIT);
+    } else if (solutionAnimation.currentStep < total) {
+        drawSolutionMoveIndicator(ctx, solutionAnimation.path[solutionAnimation.currentStep], startX, bottleY, BOTTLE_WIDTH, BOTTLE_GAP_X, UNIT);
+    }
 
-            const innerBottleX = bottleX + ctx.lineWidth;
-            const innerBottleY = bottleY;
-            const innerBottleWidth = BOTTLE_WIDTH - ctx.lineWidth * 2;
-            const innerBottleHeight = BOTTLE_HEIGHT;
-
-            for (let segIdx = 0; segIdx < 4; segIdx++) {
-                const colorHex = bottle[segIdx];
-                if (colorHex) {
-                    ctx.fillStyle = `#${colorHex}`;
-                    const segY = innerBottleY + innerBottleHeight - ((segIdx + 1) * SEGMENT_HEIGHT);
-                    
-                    if(segIdx === 0) {
-                        ctx.beginPath();
-                        ctx.moveTo(innerBottleX, segY);
-                        ctx.lineTo(innerBottleX + innerBottleWidth, segY);
-                        ctx.lineTo(innerBottleX + innerBottleWidth, innerBottleY + innerBottleHeight - radius);
-                        ctx.quadraticCurveTo(innerBottleX + innerBottleWidth, innerBottleY + innerBottleHeight, innerBottleX + innerBottleWidth - radius, innerBottleY + innerBottleHeight);
-                        ctx.lineTo(innerBottleX + radius, innerBottleY + innerBottleHeight);
-                        ctx.quadraticCurveTo(innerBottleX, innerBottleY + innerBottleHeight, innerBottleX, innerBottleY + innerBottleHeight - radius);
-                        ctx.closePath();
-                        ctx.fill();
-                    } else {
-                        ctx.fillRect(innerBottleX, segY, innerBottleWidth, SEGMENT_HEIGHT);
-                    }
-
-                    if(segIdx < 3) {
-                        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-                        ctx.lineWidth = 1 * UNIT;
-                        ctx.beginPath();
-                        ctx.moveTo(innerBottleX + 3, segY);
-                        ctx.lineTo(innerBottleX + innerBottleWidth - 3, segY);
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            if(currentMove) {
-                ctx.font = `${24 * UNIT}px "Segoe UI", Arial`;
-                ctx.textAlign = 'center';
-                ctx.fillStyle = '#fff';
-                
-                if (bottleIdx === currentMove.from - 1) {
-                    ctx.fillText('👆', bottleX + BOTTLE_WIDTH / 2, fingerIconY + 6 * UNIT);
-                } else if (bottleIdx === currentMove.to - 1) {
-                    ctx.fillText('👇', bottleX + BOTTLE_WIDTH / 2, fingerIconY + 6 * UNIT);
-                }
-            }
-
-            if (bottle.length === 4 && bottle.every(c => c === bottle[0])) {
-                ctx.font = `${22 * UNIT}px "Segoe UI", Arial`;
-                ctx.textAlign = 'center';
-                ctx.fillStyle = '#fff';
-                ctx.fillText('👑', bottleX + BOTTLE_WIDTH / 2, bottleY - 24 * UNIT);
-            }
-
-            ctx.fillStyle = '#fff';
-            ctx.font = `800 ${15 * UNIT}px "Segoe UI", Arial`; 
-            ctx.textAlign = 'center';
-            const textY = bottleY + BOTTLE_HEIGHT + 6 * UNIT;
-            ctx.fillText(bottleIdx + 1, bottleX + BOTTLE_WIDTH / 2, textY);
-        }
-    });
+    updateSolutionControls();
 }
+
+function drawSolutionBottle(ctx, bottle, x, y, width, height, UNIT, bottleIndex) {
+    const radius = 7 * UNIT;
+    ctx.strokeStyle = '#6cb885';
+    ctx.lineWidth = 2 * UNIT;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + width, y);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(10, 23, 17, 0.8)';
+    ctx.fill();
+    ctx.stroke();
+
+    const innerX = x + ctx.lineWidth;
+    const innerWidth = width - ctx.lineWidth * 2;
+    const segmentHeight = height / 4;
+
+    for (let segIdx = 0; segIdx < 4; segIdx++) {
+        const colorHex = bottle[segIdx];
+        if (!colorHex) continue;
+
+        const segY = y + height - ((segIdx + 1) * segmentHeight);
+        ctx.fillStyle = colorHex === '?' ? '#583122' : `#${colorHex}`;
+
+        if (segIdx === 0) {
+            ctx.beginPath();
+            ctx.moveTo(innerX, segY);
+            ctx.lineTo(innerX + innerWidth, segY);
+            ctx.lineTo(innerX + innerWidth, y + height - radius);
+            ctx.quadraticCurveTo(innerX + innerWidth, y + height, innerX + innerWidth - radius, y + height);
+            ctx.lineTo(innerX + radius, y + height);
+            ctx.quadraticCurveTo(innerX, y + height, innerX, y + height - radius);
+            ctx.closePath();
+            ctx.fill();
+        } else {
+            ctx.fillRect(innerX, segY, innerWidth, segmentHeight);
+        }
+
+        if (colorHex === '?') {
+            ctx.fillStyle = '#fff';
+            ctx.font = `700 ${18 * UNIT}px "Segoe UI", Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('?', x + width / 2, segY + segmentHeight * 0.15);
+        }
+
+        if (segIdx < 3) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1 * UNIT;
+            ctx.beginPath();
+            ctx.moveTo(innerX + 3, segY);
+            ctx.lineTo(innerX + innerWidth - 3, segY);
+            ctx.stroke();
+        }
+    }
+
+    if (bottle.length === 4 && bottle.every(c => c === bottle[0])) {
+        ctx.font = `${22 * UNIT}px "Segoe UI Emoji", Arial`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('👑', x + width / 2, y - 27 * UNIT);
+    }
+
+    ctx.fillStyle = '#fff';
+    ctx.font = `800 ${15 * UNIT}px "Segoe UI", Arial`;
+    ctx.textAlign = 'center';
+    ctx.fillText(bottleIndex + 1, x + width / 2, y + height + 6 * UNIT);
+}
+
+function drawMovingColor(ctx, board, animation, startX, bottleY, bottleWidth, bottleGap, bottleHeight, segmentHeight, UNIT) {
+    const from = solutionAnimation.fromBottle;
+    const to = solutionAnimation.toBottle;
+    if (from == null || to == null) return;
+
+    const fromX = startX + from * (bottleWidth + bottleGap) + bottleWidth / 2;
+    const toX = startX + to * (bottleWidth + bottleGap) + bottleWidth / 2;
+
+    const fromCount = board[from].length;
+    const toCount = board[to].length;
+
+    const startY = bottleY + bottleHeight - (fromCount + 0.5) * segmentHeight;
+    const endY = bottleY + bottleHeight - (toCount + 0.5) * segmentHeight;
+
+    const p = animation.progress;
+    const x = fromX + (toX - fromX) * p;
+    const arc = Math.max(32 * UNIT, Math.abs(toX - fromX) * 0.12);
+    const y = startY + (endY - startY) * p - Math.sin(Math.PI * p) * arc;
+
+    const w = bottleWidth - 4 * UNIT;
+    const h = segmentHeight - 4 * UNIT;
+
+    ctx.save();
+    ctx.fillStyle = `#${solutionAnimation.color}`;
+    ctx.shadowColor = `#${solutionAnimation.color}`;
+    ctx.shadowBlur = 12 * UNIT;
+    ctx.fillRect(x - w / 2, y - h / 2, w, h);
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    ctx.lineWidth = 1 * UNIT;
+    ctx.strokeRect(x - w / 2, y - h / 2, w, h);
+    ctx.restore();
+}
+
+function drawSolutionMoveIndicator(ctx, move, startX, bottleY, bottleWidth, bottleGap, UNIT) {
+    const from = move.from - 1;
+    const to = move.to - 1;
+    const fromX = startX + from * (bottleWidth + bottleGap) + bottleWidth / 2;
+    const toX = startX + to * (bottleWidth + bottleGap) + bottleWidth / 2;
+
+    ctx.font = `${22 * UNIT}px "Segoe UI Emoji", Arial`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('👆', fromX, bottleY - 34 * UNIT);
+    ctx.fillText('👇', toX, bottleY - 34 * UNIT);
+}
+
+window.addEventListener('resize', () => {
+    if (solutionAnimation.states && solutionAnimation.states.length) {
+        renderSolutionFrame();
+    }
+});
 
 window.onload = init;
 </script>
