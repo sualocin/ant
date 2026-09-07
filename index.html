@@ -669,14 +669,33 @@ function ai_make_move(game, original_piece_set) {
 
 function ai_make_move_impl(game, piece_set) {
     const board = game.board;
-    const result = { evaluation: INF_SCORE, new_game_states: Array(3).fill({ board: getFull(), previous_piece_placement: getEmpty() }) };
-    
+    // clearedTotal: 이번 3개 도형을 배치하는 동안 실제로 "없어진(클리어된)" 칸의 총 개수.
+    // 이 값을 1순위 기준으로 삼아, 지울 수 있는 상황에서는 반드시 지우는 쪽을 선택하도록 한다.
+    // 기존의 get_eval(보드 모양 평가)은 클리어 수가 동일할 때만 2순위 타이브레이커로 사용한다.
+    const result = { evaluation: INF_SCORE, clearedTotal: -1, new_game_states: Array(3).fill({ board: getFull(), previous_piece_placement: getEmpty() }) };
+    const startCount = count(board);
+
     for (const [p0, p1, p2] of get_all_piece_set_permutations(piece_set)) {
         for (const { placement: placement_0, board: after_p0 } of get_next_boards(board, p0, true)) {
+            const cleared0 = (startCount + count(p0)) - count(after_p0);
+            const count_after_p0 = count(after_p0);
             for (const { placement: placement_1, board: after_p1 } of get_next_boards(after_p0, p1, true)) {
+                const cleared1 = (count_after_p0 + count(p1)) - count(after_p1);
+                const count_after_p1 = count(after_p1);
                 for (const { placement: placement_2, board: after_p2 } of get_next_boards(after_p1, p2)) {
-                    const score = get_eval(after_p2, result.evaluation);
-                    if (score < result.evaluation) {
+                    const cleared2 = (count_after_p1 + count(p2)) - count(after_p2);
+                    const totalCleared = cleared0 + cleared1 + cleared2;
+
+                    // 이미 찾은 최선의 결과보다 지운 칸 수가 적다면, 굳이 평가 점수를 계산할 필요 없이 건너뛴다.
+                    if (totalCleared < result.clearedTotal) continue;
+
+                    // 지운 칸 수가 같을 때만 기존 evaluation을 상한선으로 써서 조기 종료 최적화를 적용하고,
+                    // 지운 칸 수가 더 많아 무조건 갱신될 경우엔 정확한 점수를 구하기 위해 상한을 두지 않는다.
+                    const evalMax = (totalCleared === result.clearedTotal) ? result.evaluation : INF_SCORE;
+                    const score = get_eval(after_p2, evalMax);
+
+                    if (totalCleared > result.clearedTotal || score < result.evaluation) {
+                        result.clearedTotal = totalCleared;
                         result.evaluation = score;
                         result.new_game_states = [
                             { board: after_p0, previous_piece_placement: placement_0 },
